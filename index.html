@@ -15,6 +15,7 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0f172a;
+            /* 背景图 */
             background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
                               radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
                               radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
@@ -22,48 +23,61 @@
             background-size: cover;
             color: #fff;
             min-height: 100vh;
+            /* 🟢 布局修复：垂直排列，防止重叠 */
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* 改为从上到下排列 */
+            justify-content: flex-start;
             padding: 2rem 1rem;
             gap: 1.5rem;
         }
         
-        /* 挖矿主卡片 */
+        /* 1. 标题容器 (修复重影问题) */
+        .header-box {
+            position: relative;
+            z-index: 20;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            /* 增加文字阴影，防止背景干扰 */
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* 2. 挖矿卡片 */
         .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(16px);
+            background: rgba(30, 41, 59, 0.7); /* 加深背景，提升对比度 */
+            backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
             width: 100%; max-width: 400px; border-radius: 24px; padding: 2rem;
             position: relative; z-index: 10;
         }
 
-        /* 游戏卡片 */
+        /* 3. 游戏卡片 (高亮优化) */
         .game-card {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.05); /* 稍微提亮 */
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
             width: 100%; max-width: 400px;
             padding: 1rem;
             text-align: center;
             overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
+        /* 按钮样式 */
         .btn-gold {
             background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%);
-            color: #3e2723; transition: all 0.3s ease; font-weight: 800; border: none;
+            color: #3e2723; transition: all 0.2s; font-weight: 800; border: none;
             cursor: pointer; opacity: 1 !important;
         }
-        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(253, 185, 49, 0.3); }
+        .btn-gold:active { transform: scale(0.98); }
         
         .btn-green {
             background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
-            color: #064e3b; transition: all 0.3s ease; font-weight: 800; border: none;
+            color: #064e3b; transition: all 0.2s; font-weight: 800; border: none;
             cursor: pointer; opacity: 1 !important;
         }
-        .btn-green:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(74, 222, 128, 0.4); }
+        .btn-green:active { transform: scale(0.98); }
 
         .pot-glow { text-shadow: 0 0 25px rgba(255, 215, 0, 0.4); }
         .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); }
@@ -72,26 +86,30 @@
             padding: 10px; border-radius: 12px; font-size: 0.75rem; cursor: pointer; transition: 0.2s;
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
         }
-        .mini-btn:hover { background: rgba(255,255,255,0.1); color: #FFD700; border-color: #FFD700; }
         
-        /* 游戏画布 */
+        /* 🎮 游戏画布优化 */
         canvas { 
-            background: rgba(0,0,0,0.2); 
+            background: rgba(255, 255, 255, 0.1); /* 🟢 变亮：改为半透明白色背景 */
             border-radius: 8px; 
             width: 100%; 
             image-rendering: pixelated;
-            touch-action: none; /* 防止点击游戏时放大 */
+            touch-action: none;
+            border: 1px solid rgba(255,255,255,0.1);
         }
         
         .hidden { display: none !important; }
         .fade-in { animation: fadeIn 0.5s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* 文字闪烁动画 */
+        .blink { animation: blinker 1.5s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0.3; } }
     </style>
 </head>
 <body>
 
-    <div class="text-center z-0 mb-2">
-        <h1 class="text-3xl font-extrabold tracking-tight text-white/90">KANG <span class="text-yellow-500">PROTOCOL</span></h1>
+    <div class="header-box">
+        <h1 class="text-3xl font-extrabold tracking-tight text-white">KANG <span class="text-yellow-500">PROTOCOL</span></h1>
         <p class="text-[10px] text-gray-400 mt-1 tracking-[0.2em] uppercase">Fair Launch • Win or Share</p>
     </div>
 
@@ -163,11 +181,15 @@
 
     <div class="game-card fade-in" style="animation-delay: 0.2s;">
         <div class="flex justify-between items-center mb-2 px-1">
-            <div class="text-[10px] text-gray-400 font-mono">WAITING? PLAY DINO!</div>
-            <div class="text-[10px] text-yellow-500 font-mono font-bold">SCORE: <span id="gameScore">0</span></div>
+            <div class="text-[10px] text-gray-300 font-mono font-bold"><i class="fas fa-gamepad"></i> 等待无聊？玩会游戏！</div>
+            <div class="text-[10px] text-yellow-400 font-mono font-bold">SCORE: <span id="gameScore">0</span></div>
         </div>
+        
         <canvas id="dinoCanvas" width="600" height="150"></canvas>
-        <div class="text-[9px] text-gray-600 mt-2">TAP TO JUMP / 点击屏幕跳跃</div>
+        
+        <div class="text-[10px] text-yellow-200 mt-2 font-mono blink" id="gameTip">
+            👉 点击屏幕 / 按空格键 开始跳跃 👈
+        </div>
     </div>
 
     <script>
@@ -194,7 +216,7 @@
             user: document.getElementById('userDisplay')
         };
 
-        // --- 初始化 DAPP ---
+        // --- 初始化 ---
         async function init() {
             if(typeof ethers === 'undefined') { el.pot.innerText = "Error"; return; }
             try {
@@ -206,7 +228,7 @@
                 const acc = await window.ethereum.request({method:'eth_accounts'});
                 if(acc.length > 0) connectWallet();
             }
-            initGame(); // 启动游戏
+            initGame();
         }
 
         async function loopPot() {
@@ -238,7 +260,7 @@
             try {
                 setStatus("正在请求签名...", "loading");
                 const tx = await contract.submitClaim();
-                setStatus("上链中...玩把游戏等待吧！", "loading"); // 提示玩游戏
+                setStatus("上链中...玩把游戏等待吧！", "loading"); 
                 await tx.wait();
                 setStatus("✅ 登记成功！等待结算...", "success");
             } catch(e) { handleErr(e); }
@@ -280,7 +302,7 @@
         function copyCA() { navigator.clipboard.writeText(CA); alert("✅ 地址已复制"); }
         function openBscScan() { window.open(`https://bscscan.com/address/${CA}`, '_blank'); }
 
-        // --- 🎮 极简恐龙游戏引擎 ---
+        // --- 🎮 游戏引擎 (高亮优化版) ---
         function initGame() {
             const canvas = document.getElementById('dinoCanvas');
             const ctx = canvas.getContext('2d');
@@ -288,14 +310,17 @@
             
             let gameRunning = false;
             let score = 0;
-            let dino = { x: 50, y: 100, w: 20, h: 20, dy: 0, jumpPower: -8, ground: 100 };
-            let cactus = { x: 600, y: 100, w: 10, h: 20, speed: 4 };
+            // 🦖 恐龙颜色：亮橙色
+            let dino = { x: 50, y: 100, w: 20, h: 20, dy: 0, jumpPower: -8, ground: 100, color: '#f97316' };
+            // 🌵 仙人掌颜色：亮绿色
+            let cactus = { x: 600, y: 100, w: 10, h: 20, speed: 4, color: '#4ade80' };
             let gravity = 0.4;
 
             function reset() {
                 dino.y = dino.ground; dino.dy = 0;
                 cactus.x = 600; score = 0; scoreEl.innerText = 0;
                 gameRunning = true;
+                document.getElementById('gameTip').innerText = ">>> 正在游戏中 <<<";
                 requestAnimationFrame(update);
             }
 
@@ -304,7 +329,6 @@
                 else if(dino.y === dino.ground) dino.dy = dino.jumpPower;
             }
 
-            // 输入监听
             canvas.addEventListener('mousedown', jump);
             canvas.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); });
             document.addEventListener('keydown', (e) => { if(e.code === 'Space') { e.preventDefault(); jump(); } });
@@ -315,41 +339,47 @@
                 // 清屏
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                // 地面线
+                // 地面线 (白色)
                 ctx.beginPath(); ctx.moveTo(0, 120); ctx.lineTo(600, 120);
-                ctx.strokeStyle = '#555'; ctx.stroke();
+                ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 2; ctx.stroke();
 
-                // 恐龙 (黄色块)
+                // 恐龙
                 if(dino.y < dino.ground) dino.dy += gravity;
                 dino.y += dino.dy;
                 if(dino.y > dino.ground) { dino.y = dino.ground; dino.dy = 0; }
                 
-                ctx.fillStyle = '#FFD700';
+                ctx.fillStyle = dino.color;
                 ctx.fillRect(dino.x, dino.y, dino.w, dino.h);
+                // 给恐龙加个发光效果
+                ctx.shadowBlur = 10; ctx.shadowColor = dino.color;
 
-                // 仙人掌 (绿色块)
+                // 仙人掌
+                ctx.shadowBlur = 0; // 仙人掌不发光
                 cactus.x -= cactus.speed;
                 if(cactus.x < -20) {
                     cactus.x = 600 + Math.random() * 200;
                     score++; scoreEl.innerText = score;
-                    cactus.speed += 0.1; // 越跑越快
+                    cactus.speed += 0.1;
                 }
-                ctx.fillStyle = '#4ade80';
+                ctx.fillStyle = cactus.color;
                 ctx.fillRect(cactus.x, cactus.y, cactus.w, cactus.h);
 
                 // 碰撞检测
                 if(dino.x < cactus.x + cactus.w && dino.x + dino.w > cactus.x && dino.y < cactus.y + cactus.h && dino.y + dino.h > cactus.y) {
                     gameRunning = false;
-                    ctx.fillStyle = 'white'; ctx.font = '20px monospace';
-                    ctx.fillText("GAME OVER - TAP TO RESTART", 150, 70);
+                    ctx.fillStyle = 'white'; ctx.font = 'bold 24px monospace'; ctx.textAlign = 'center';
+                    ctx.fillText("GAME OVER", 300, 60);
+                    ctx.font = '16px monospace';
+                    ctx.fillText("TAP TO RESTART", 300, 90);
+                    document.getElementById('gameTip').innerText = "点击屏幕重试 / TAP TO RESTART";
                 } else {
                     requestAnimationFrame(update);
                 }
             }
 
-            // 初始画面
-            ctx.fillStyle = '#666'; ctx.font = '20px monospace';
-            ctx.fillText("TAP TO START", 230, 70);
+            // 初始画面文字
+            ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = 'bold 20px monospace'; ctx.textAlign = 'center';
+            ctx.fillText("READY?", 300, 70);
         }
 
         window.onload = init;
