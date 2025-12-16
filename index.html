@@ -44,6 +44,15 @@
         .btn-gold:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(253, 185, 49, 0.3); }
         .btn-gold:active:not(:disabled) { transform: translateY(0); }
         .btn-gold:disabled { background: #334155; color: #94a3b8; cursor: not-allowed; box-shadow: none; }
+        
+        /* 🔴 结算按钮专用样式 (确保它是亮的) */
+        .btn-green {
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            color: #064e3b; transition: all 0.3s ease; font-weight: 800; border: none;
+        }
+        .btn-green:hover:not(:disabled) { box-shadow: 0 0 20px rgba(74, 222, 128, 0.4); transform: scale(1.02); }
+        .btn-green:disabled { background: #334155; color: #94a3b8; cursor: not-allowed; }
+
         .pot-glow { text-shadow: 0 0 25px rgba(255, 215, 0, 0.4); }
         .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); }
         .mini-btn {
@@ -149,14 +158,13 @@
             user: document.getElementById('userDisplay')
         };
 
-        // 1. 初始化 (用你验证过的源)
+        // 1. 初始化
         async function init() {
             if(typeof ethers === 'undefined') {
                 el.pot.innerText = "Error";
-                alert("严重错误：核心库加载失败，请检查网络！");
+                alert("加载失败：请刷新页面重试 (Network Error)");
                 return;
             }
-
             try {
                 const rpc = new ethers.providers.JsonRpcProvider("https://bsc-dataseed.binance.org/");
                 readOnlyContract = new ethers.Contract(CA, ABI, rpc);
@@ -179,14 +187,11 @@
             setTimeout(loopPot, 3000);
         }
 
-        // 2. 连接钱包 (增强兼容性)
+        // 2. 连接钱包
         async function connectWallet() {
             if(!window.ethereum) return alert("请在钱包浏览器中打开此网页！");
-            
             try {
-                // 请求连接
                 await window.ethereum.request({ method: 'eth_requestAccounts' });
-                // 自动切链到 BSC
                 await switchToBSC();
 
                 provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -194,38 +199,52 @@
                 contract = new ethers.Contract(CA, ABI, signer);
                 
                 const addr = await signer.getAddress();
-                
-                // 切换界面
                 el.connectView.classList.add('hidden');
                 el.miningView.classList.remove('hidden');
                 el.user.innerText = addr.slice(0,6) + "..." + addr.slice(-4);
 
-                // 立即检查状态 (核心修复：防止 Already Submitted 报错)
-                checkUserStatus(addr);
+                checkUserStatus(addr); // 🟢 关键：连接成功后立即检查状态
 
             } catch(e) { alert("连接失败: " + e.message); }
         }
 
-        // 3. 智能状态检测 (防止红字报错)
+        // 3. 智能状态检测 (核心修复！)
         async function checkUserStatus(addr) {
             try {
                 const curId = await contract.currentCycleId();
                 const lastId = await contract.lastClaimedCycleId(addr);
                 const cycleData = await contract.currentCycle(); 
-                const isFinalized = cycleData[3];
+                const isFinalized = cycleData[3]; // 这是一个布尔值
 
-                // 如果本轮已参与且未结算
+                console.log("Cycle Check:", curId.toString(), lastId.toString(), isFinalized);
+
+                // 🟢 逻辑：如果(本轮ID == 用户最后参与ID) 并且 (本轮还没结算)
+                // 这意味着：用户已经Submit了，正在等待Finalize
                 if(curId.eq(lastId) && !isFinalized) {
+                    
+                    // 1. 禁用“抢夺”
                     el.submit.disabled = true;
-                    el.submit.innerHTML = "<i class='fas fa-check'></i> 本轮已抢 (Wait)";
+                    el.submit.innerHTML = "<i class='fas fa-times'></i> 本轮已参与 (Wait)";
+                    el.submit.className = "w-full py-4 rounded-xl text-lg shadow-lg relative overflow-hidden bg-gray-700 text-gray-400 cursor-not-allowed"; // 变灰
+
+                    // 2. 启用“结算” (并变成绿色，超醒目)
                     el.finalize.disabled = false;
+                    el.finalize.className = "w-full py-4 rounded-xl font-bold text-lg btn-green shadow-lg"; // 变绿
+                    el.finalize.innerHTML = "<div class='flex items-center justify-center gap-2'><i class='fas fa-check-circle'></i> 立即结算 (Finalize)</div>";
+
                     el.timer.innerText = ">>> 等待结算 (Action Required) <<<";
-                    el.timer.style.color = "#FFD700";
-                    setStatus("检测到您已参与，请点击结算！", "warn");
+                    el.timer.style.color = "#4ade80";
+                    setStatus("检测到您已参与，请点击下方绿色按钮结算！", "success");
+
                 } else {
+                    // 正常状态：可以抢夺
                     el.submit.disabled = false;
-                    el.submit.innerHTML = "<i class='fas fa-hammer'></i> 立即抢夺 (Submit)";
+                    el.submit.innerHTML = "<div class='relative z-10 flex items-center justify-center gap-2'><i class='fas fa-hammer'></i> 立即抢夺 (Submit)</div>";
+                    el.submit.className = "btn-gold w-full py-4 rounded-xl text-lg shadow-lg relative overflow-hidden"; // 变回金色
+
                     el.finalize.disabled = true;
+                    el.finalize.className = "w-full py-4 rounded-xl font-bold text-lg border-2 border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10 transition disabled:opacity-30 disabled:border-gray-700 disabled:text-gray-600"; // 变灰
+
                     el.timer.innerText = "--- 空闲 Idle ---";
                     el.timer.style.color = "#94a3b8";
                 }
@@ -240,19 +259,16 @@
                 setStatus("交易上链中...请稍候", "loading");
                 await tx.wait();
                 
-                setStatus("锁定成功！等待 4 秒安全期...", "success");
-                el.finalize.disabled = false;
-                el.submit.disabled = true; // 立即禁用防止重复点
+                // 成功后，手动切换状态
+                checkUserStatus(el.user.innerText); 
+                setStatus("锁定成功！请等待4秒后点击结算...", "success");
                 
                 let t = 4;
                 const iv = setInterval(() => {
                     t--;
-                    if(t > 0) el.timer.innerText = `等待区块确认... ${t}s`;
-                    else {
+                    if(t <= 0) {
                         clearInterval(iv);
-                        el.timer.innerText = ">>> 窗口期结束，可结算 <<<";
-                        el.timer.style.color = "#FFD700";
-                        setStatus("请点击下方按钮结算领币！", "warn");
+                        checkUserStatus(el.user.innerText); // 再次确认状态，确保结算按钮亮起
                     }
                 }, 1000);
             } catch(e) { handleErr(e); }
@@ -266,15 +282,16 @@
                 await tx.wait();
                 
                 setStatus("🎉 成功！收益已到账", "success");
+                el.finalize.disabled = true; 
+
+                // 2秒后强制刷新，开始新一轮
                 setTimeout(() => {
-                    // 重置状态
-                    checkUserStatus(el.user.innerText);
-                    setStatus("准备就绪 System Ready", "normal");
-                }, 3000);
+                    location.reload();
+                }, 2000);
+
             } catch(e) { handleErr(e); }
         }
 
-        // 辅助函数
         async function switchToBSC() {
             try {
                 await window.ethereum.request({
@@ -311,10 +328,10 @@
             if(e.reason) m = e.reason;
             if(e.message && e.message.includes("user rejected")) m = "用户取消";
             if(m.includes("Window")) m = "太快了！请等待倒计时";
-            if(m.includes("Already submitted")) m = "本轮您已参与！请直接结算";
+            if(m.includes("Already submitted")) m = "本轮您已参与！请点击绿色结算按钮";
             
             setStatus("❌ " + m, "error");
-            if(m.includes("已参与")) checkUserStatus(el.user.innerText);
+            if(m.includes("已参与") || m.includes("Already")) checkUserStatus(el.user.innerText);
         }
 
         function copyCA() {
