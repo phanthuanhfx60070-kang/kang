@@ -15,7 +15,6 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0f172a;
-            /* 背景图 */
             background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
                               radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
                               radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
@@ -23,7 +22,6 @@
             background-size: cover;
             color: #fff;
             min-height: 100vh;
-            /* 🟢 布局修复：垂直排列，防止重叠 */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -32,52 +30,38 @@
             gap: 1.5rem;
         }
         
-        /* 1. 标题容器 (修复重影问题) */
-        .header-box {
-            position: relative;
-            z-index: 20;
-            text-align: center;
-            margin-bottom: 0.5rem;
-            /* 增加文字阴影，防止背景干扰 */
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-
-        /* 2. 挖矿卡片 */
+        .header-box { position: relative; z-index: 20; text-align: center; margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         .glass-card {
-            background: rgba(30, 41, 59, 0.7); /* 加深背景，提升对比度 */
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            width: 100%; max-width: 400px; border-radius: 24px; padding: 2rem;
-            position: relative; z-index: 10;
+            background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            width: 100%; max-width: 400px; border-radius: 24px; padding: 2rem; position: relative; z-index: 10;
         }
-
-        /* 3. 游戏卡片 (高亮优化) */
         .game-card {
-            background: rgba(255, 255, 255, 0.05); /* 稍微提亮 */
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            width: 100%; max-width: 400px;
-            padding: 1rem;
-            text-align: center;
-            overflow: hidden;
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px; width: 100%; max-width: 400px; padding: 1rem; text-align: center; overflow: hidden;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        /* 按钮样式 */
+        /* 按钮状态 */
         .btn-gold {
-            background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%);
-            color: #3e2723; transition: all 0.2s; font-weight: 800; border: none;
-            cursor: pointer; opacity: 1 !important;
+            background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%); color: #3e2723;
+            transition: all 0.2s; font-weight: 800; border: none; cursor: pointer;
         }
-        .btn-gold:active { transform: scale(0.98); }
+        .btn-gold:disabled { background: #475569; color: #94a3b8; cursor: not-allowed; opacity: 0.6; }
         
         .btn-green {
-            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
-            color: #064e3b; transition: all 0.2s; font-weight: 800; border: none;
-            cursor: pointer; opacity: 1 !important;
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); color: #064e3b;
+            transition: all 0.2s; font-weight: 800; border: none; cursor: pointer;
         }
-        .btn-green:active { transform: scale(0.98); }
+        .btn-green:disabled { background: #1e293b; color: #475569; border: 2px solid #334155; cursor: not-allowed; opacity: 1; }
+        
+        /* 🔴 强制清场按钮 (红色) - 只结算，不抢夺 */
+        .btn-clear {
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: #fff;
+            transition: all 0.2s; font-weight: 800; border: none; cursor: pointer;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+        }
+        .btn-clear:hover { transform: scale(1.02); }
 
         .pot-glow { text-shadow: 0 0 25px rgba(255, 215, 0, 0.4); }
         .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); }
@@ -87,21 +71,10 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
         }
         
-        /* 🎮 游戏画布优化 */
-        canvas { 
-            background: rgba(255, 255, 255, 0.1); /* 🟢 变亮：改为半透明白色背景 */
-            border-radius: 8px; 
-            width: 100%; 
-            image-rendering: pixelated;
-            touch-action: none;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
+        canvas { background: rgba(255, 255, 255, 0.1); border-radius: 8px; width: 100%; touch-action: none; border: 1px solid rgba(255,255,255,0.1); }
         .hidden { display: none !important; }
         .fade-in { animation: fadeIn 0.5s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* 文字闪烁动画 */
         .blink { animation: blinker 1.5s linear infinite; }
         @keyframes blinker { 50% { opacity: 0.3; } }
     </style>
@@ -114,12 +87,12 @@
     </div>
 
     <div class="glass-card fade-in">
-        
         <div class="text-center mb-6">
             <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Current Reward Pot</div>
             <div class="relative">
-                <div id="potValue" class="text-3xl md:text-5xl font-black text-white pot-glow font-mono break-all">LOADING</div>
+                <div id="potValue" class="text-3xl md:text-5xl font-black text-white pot-glow font-mono break-all leading-tight">LOADING...</div>
                 <div class="text-xs font-bold text-yellow-500 mt-2">PENDING KANG TOKENS</div>
+                <div id="nodeStatus" class="text-[9px] text-gray-500 mt-1">Connecting...</div>
             </div>
         </div>
 
@@ -127,7 +100,6 @@
             <button onclick="connectWallet()" class="btn-gold w-full py-4 rounded-xl text-lg shadow-lg flex items-center justify-center gap-2">
                 <i class="fas fa-wallet"></i> 连接钱包 (Connect)
             </button>
-            <p class="text-xs text-gray-500 mt-4">Connect wallet to start mining</p>
         </div>
 
         <div id="miningView" class="hidden space-y-4">
@@ -135,14 +107,10 @@
                 准备就绪 System Ready
             </div>
 
-            <div class="bg-yellow-900/30 border border-yellow-700/50 rounded-lg p-3 text-left">
-                <div class="text-[10px] text-yellow-500 font-bold mb-1 flex items-center gap-1">
-                    <i class="fas fa-exclamation-triangle"></i> RULES:
+            <div id="infoBar" class="bg-blue-900/30 border border-blue-700/50 rounded-lg p-3 text-left hidden">
+                <div class="text-[11px] text-blue-200 flex items-center gap-2">
+                    <i class="fas fa-info-circle"></i> <span id="infoText">检测中...</span>
                 </div>
-                <ul class="text-[10px] text-gray-300 list-disc list-inside space-y-1">
-                    <li>想分钱必须先点 <span class="text-yellow-400 font-bold">立即抢夺</span>。</li>
-                    <li>点击 <span class="text-green-400 font-bold">结算</span> 触发分红，获 5% 赏金。</li>
-                </ul>
             </div>
 
             <div class="grid gap-3">
@@ -152,7 +120,7 @@
                     </div>
                 </button>
 
-                <button id="finalizeBtn" onclick="finalizePayout()" class="btn-green w-full py-4 rounded-xl font-bold text-lg shadow-lg">
+                <button id="finalizeBtn" onclick="finalizePayout()" disabled class="btn-green w-full py-4 rounded-xl font-bold text-lg shadow-lg">
                     <div class="flex items-center justify-center gap-2">
                         <i class="fas fa-download"></i> 结算领币 (Finalize)
                     </div>
@@ -181,49 +149,53 @@
 
     <div class="game-card fade-in" style="animation-delay: 0.2s;">
         <div class="flex justify-between items-center mb-2 px-1">
-            <div class="text-[10px] text-gray-300 font-mono font-bold"><i class="fas fa-gamepad"></i> 等待无聊？玩会游戏！</div>
+            <div class="text-[10px] text-gray-300 font-mono font-bold"><i class="fas fa-gamepad"></i> 娱乐时间</div>
             <div class="text-[10px] text-yellow-400 font-mono font-bold">SCORE: <span id="gameScore">0</span></div>
         </div>
-        
         <canvas id="dinoCanvas" width="600" height="150"></canvas>
-        
-        <div class="text-[10px] text-yellow-200 mt-2 font-mono blink" id="gameTip">
-            👉 点击屏幕 / 按空格键 开始跳跃 👈
-        </div>
+        <div class="text-[10px] text-yellow-200 mt-2 font-mono blink" id="gameTip">TAP TO START</div>
     </div>
 
     <script>
-        // --- DAPP 逻辑 ---
         const CA = "0x65a762e8B7639596dbFBCcd9A541d44B0CF67762";
         const ABI = [
             "function submitClaim() public",
             "function finalizePayout() public",
             "function checkCurrentPot() public view returns (uint256)",
-            "function currentCycleId() public view returns (uint256)",
-            "function lastClaimedCycleId(address) public view returns (uint256)",
             "function currentCycle() public view returns (uint256, uint256, address[], bool)"
         ];
+        const RPC_LIST = ["https://bsc-dataseed.binance.org/", "https://bsc-dataseed1.defibit.io/", "https://bsc-dataseed1.ninicoin.io/"];
 
         let provider, signer, contract, readOnlyContract;
         
         const el = {
             pot: document.getElementById('potValue'),
+            nodeStatus: document.getElementById('nodeStatus'),
             connectView: document.getElementById('connectView'),
             miningView: document.getElementById('miningView'),
             status: document.getElementById('statusLog'),
+            user: document.getElementById('userDisplay'),
             submit: document.getElementById('submitBtn'),
             finalize: document.getElementById('finalizeBtn'),
-            user: document.getElementById('userDisplay')
+            infoBar: document.getElementById('infoBar'),
+            infoText: document.getElementById('infoText')
         };
 
-        // --- 初始化 ---
         async function init() {
-            if(typeof ethers === 'undefined') { el.pot.innerText = "Error"; return; }
-            try {
-                const rpc = new ethers.providers.JsonRpcProvider("https://bsc-dataseed.binance.org/");
-                readOnlyContract = new ethers.Contract(CA, ABI, rpc);
-                loopPot();
-            } catch(e) {}
+            if(typeof ethers === 'undefined') { el.pot.innerText = "Lib Error"; return; }
+            let connected = false;
+            for (let rpc of RPC_LIST) {
+                try {
+                    const tempProvider = new ethers.providers.JsonRpcProvider(rpc);
+                    readOnlyContract = new ethers.Contract(CA, ABI, tempProvider);
+                    await readOnlyContract.checkCurrentPot();
+                    el.nodeStatus.innerText = "🟢 Node Synced";
+                    connected = true;
+                    loopPot(); checkGlobalState(); setInterval(checkGlobalState, 3000);
+                    break;
+                } catch(e) { }
+            }
+            if(!connected) { el.pot.innerText = "Net Error"; }
             if(window.ethereum) {
                 const acc = await window.ethereum.request({method:'eth_accounts'});
                 if(acc.length > 0) connectWallet();
@@ -241,6 +213,43 @@
             setTimeout(loopPot, 3000);
         }
 
+        // 🔴 核心：状态检测 (决定按钮功能)
+        async function checkGlobalState() {
+            if(!readOnlyContract) return;
+            try {
+                const cycleData = await readOnlyContract.currentCycle();
+                const startTime = cycleData[1];
+                const isFinalized = cycleData[3];
+
+                // 如果有人占位且未结算 (不管是谁)
+                if(startTime.gt(0) && !isFinalized) {
+                    
+                    // 1. 禁用抢夺 (因为还没结算，不能进新一轮)
+                    el.submit.disabled = true;
+                    el.submit.innerHTML = "<i class='fas fa-lock'></i> 本轮被占用 (Blocked)";
+                    
+                    // 2. 启用清场模式
+                    el.finalize.disabled = false;
+                    el.finalize.className = "btn-clear w-full py-4 rounded-xl font-bold text-lg shadow-lg"; // 🔴 红色
+                    el.finalize.innerHTML = "<div class='flex items-center justify-center gap-2'><i class='fas fa-trash-alt'></i> 强制结算 (只清场，不抢)</div>";
+                    
+                    el.infoBar.classList.remove('hidden');
+                    el.infoText.innerText = "⚠️ 别人卡单了？点击红色按钮强制清场！(清场后需等待奖池增长再抢)";
+                    
+                } else {
+                    // 正常模式
+                    el.submit.disabled = false;
+                    el.submit.innerHTML = "<div class='relative z-10 flex items-center justify-center gap-2'><i class='fas fa-hammer'></i> 立即抢夺 (Submit)</div>";
+                    
+                    el.finalize.disabled = true;
+                    el.finalize.className = "btn-green w-full py-4 rounded-xl font-bold text-lg shadow-lg opacity-50"; // 灰色
+                    el.finalize.innerHTML = "等待抢夺...";
+                    
+                    el.infoBar.classList.add('hidden');
+                }
+            } catch(e) {}
+        }
+
         async function connectWallet() {
             if(!window.ethereum) return alert("请在钱包浏览器中打开！");
             try {
@@ -249,29 +258,36 @@
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 signer = provider.getSigner();
                 contract = new ethers.Contract(CA, ABI, signer);
+                readOnlyContract = contract;
                 const addr = await signer.getAddress();
                 el.connectView.classList.add('hidden');
                 el.miningView.classList.remove('hidden');
                 el.user.innerText = addr.slice(0,6) + "..." + addr.slice(-4);
-            } catch(e) { alert("连接失败: " + e.message); }
+                checkGlobalState();
+            } catch(e) { alert("连接失败"); }
         }
 
         async function submitClaim() {
             try {
-                setStatus("正在请求签名...", "loading");
+                setStatus("请求签名...", "loading");
                 const tx = await contract.submitClaim();
-                setStatus("上链中...玩把游戏等待吧！", "loading"); 
+                setStatus("上链中...等待确认", "loading"); 
                 await tx.wait();
-                setStatus("✅ 登记成功！等待结算...", "success");
+                setStatus("✅ 抢夺成功！现在你是本轮主宰", "success");
+                checkGlobalState();
             } catch(e) { handleErr(e); }
         }
 
+        // 🔴 核心：仅清场，不连击
         async function finalizePayout() {
             try {
-                setStatus("正在结算...", "loading");
+                setStatus("正在清理卡单...", "loading");
                 const tx = await contract.finalizePayout();
                 await tx.wait();
-                setStatus("🎉 结算成功！赏金到账", "success");
+                
+                setStatus("🧹 清场成功！现在奖池已重置。", "success");
+                
+                // 仅刷新页面，不自动抢
                 setTimeout(() => { location.reload(); }, 2000);
             } catch(e) { handleErr(e); }
         }
@@ -283,105 +299,52 @@
         }
 
         function setStatus(msg, type) {
-            el.status.innerText = msg;
-            el.status.className = "rounded-lg p-3 text-xs text-center font-mono border transition-all ";
-            if(type === 'loading') el.status.className += "bg-blue-900/30 text-blue-300 border-blue-800 animate-pulse";
-            else if(type === 'success') el.status.className += "bg-green-900/30 text-green-300 border-green-800";
-            else if(type === 'warn') el.status.className += "bg-yellow-900/30 text-yellow-300 border-yellow-800";
-            else el.status.className += "bg-gray-800/50 text-gray-300 border-gray-700/50";
+            const s = document.getElementById('statusLog');
+            s.innerText = msg;
+            s.className = "rounded-lg p-3 text-xs text-center font-mono border transition-all ";
+            if(type === 'loading') s.className += "bg-blue-900/30 text-blue-300 border-blue-800 animate-pulse";
+            else if(type === 'success') s.className += "bg-green-900/30 text-green-300 border-green-800";
+            else s.className += "bg-yellow-900/30 text-yellow-300 border-yellow-800";
         }
 
         function handleErr(e) {
             let m = "交易失败";
             if(e.reason) m = e.reason;
             if(e.message && e.message.includes("user rejected")) m = "用户取消";
-            if(m.includes("Already submitted")) m = "本轮已登记！请直接点结算";
+            if(m.includes("Already submitted")) { m = "本轮已被占用！请直接点结算"; checkGlobalState(); }
             setStatus("❌ " + m, "error");
         }
 
         function copyCA() { navigator.clipboard.writeText(CA); alert("✅ 地址已复制"); }
         function openBscScan() { window.open(`https://bscscan.com/address/${CA}`, '_blank'); }
 
-        // --- 🎮 游戏引擎 (高亮优化版) ---
+        // --- 🎮 恐龙游戏 ---
         function initGame() {
             const canvas = document.getElementById('dinoCanvas');
             const ctx = canvas.getContext('2d');
             const scoreEl = document.getElementById('gameScore');
-            
-            let gameRunning = false;
-            let score = 0;
-            // 🦖 恐龙颜色：亮橙色
-            let dino = { x: 50, y: 100, w: 20, h: 20, dy: 0, jumpPower: -8, ground: 100, color: '#f97316' };
-            // 🌵 仙人掌颜色：亮绿色
-            let cactus = { x: 600, y: 100, w: 10, h: 20, speed: 4, color: '#4ade80' };
+            let gameRunning = false, score = 0;
+            let dino = { x: 50, y: 110, dy: 0, jumpPower: -8, ground: 110 };
+            let cactus = { x: 600, y: 110, speed: 4 };
             let gravity = 0.4;
-
-            function reset() {
-                dino.y = dino.ground; dino.dy = 0;
-                cactus.x = 600; score = 0; scoreEl.innerText = 0;
-                gameRunning = true;
-                document.getElementById('gameTip').innerText = ">>> 正在游戏中 <<<";
-                requestAnimationFrame(update);
-            }
-
-            function jump() {
-                if(!gameRunning) reset();
-                else if(dino.y === dino.ground) dino.dy = dino.jumpPower;
-            }
-
-            canvas.addEventListener('mousedown', jump);
-            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); });
-            document.addEventListener('keydown', (e) => { if(e.code === 'Space') { e.preventDefault(); jump(); } });
-
+            function reset() { dino.y = dino.ground; dino.dy = 0; cactus.x = 600; score = 0; scoreEl.innerText = 0; gameRunning = true; document.getElementById('gameTip').innerText = ">>> 正在游戏中 <<<"; requestAnimationFrame(update); }
+            function jump() { if(!gameRunning) reset(); else if(dino.y === dino.ground) dino.dy = dino.jumpPower; }
+            canvas.addEventListener('mousedown', jump); canvas.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); }); document.addEventListener('keydown', (e) => { if(e.code === 'Space') { e.preventDefault(); jump(); } });
             function update() {
                 if(!gameRunning) return;
-
-                // 清屏
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                // 地面线 (白色)
-                ctx.beginPath(); ctx.moveTo(0, 120); ctx.lineTo(600, 120);
-                ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 2; ctx.stroke();
-
-                // 恐龙
-                if(dino.y < dino.ground) dino.dy += gravity;
-                dino.y += dino.dy;
-                if(dino.y > dino.ground) { dino.y = dino.ground; dino.dy = 0; }
-                
-                ctx.fillStyle = dino.color;
-                ctx.fillRect(dino.x, dino.y, dino.w, dino.h);
-                // 给恐龙加个发光效果
-                ctx.shadowBlur = 10; ctx.shadowColor = dino.color;
-
-                // 仙人掌
-                ctx.shadowBlur = 0; // 仙人掌不发光
-                cactus.x -= cactus.speed;
-                if(cactus.x < -20) {
-                    cactus.x = 600 + Math.random() * 200;
-                    score++; scoreEl.innerText = score;
-                    cactus.speed += 0.1;
-                }
-                ctx.fillStyle = cactus.color;
-                ctx.fillRect(cactus.x, cactus.y, cactus.w, cactus.h);
-
-                // 碰撞检测
-                if(dino.x < cactus.x + cactus.w && dino.x + dino.w > cactus.x && dino.y < cactus.y + cactus.h && dino.y + dino.h > cactus.y) {
-                    gameRunning = false;
-                    ctx.fillStyle = 'white'; ctx.font = 'bold 24px monospace'; ctx.textAlign = 'center';
-                    ctx.fillText("GAME OVER", 300, 60);
-                    ctx.font = '16px monospace';
-                    ctx.fillText("TAP TO RESTART", 300, 90);
-                    document.getElementById('gameTip').innerText = "点击屏幕重试 / TAP TO RESTART";
-                } else {
-                    requestAnimationFrame(update);
-                }
+                ctx.beginPath(); ctx.moveTo(0, 125); ctx.lineTo(600, 125); ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 2; ctx.stroke();
+                if(dino.y < dino.ground) dino.dy += gravity; dino.y += dino.dy; if(dino.y > dino.ground) { dino.y = dino.ground; dino.dy = 0; }
+                ctx.font = "30px serif"; ctx.textAlign = "left"; ctx.textBaseline = "bottom";
+                ctx.fillText("🦖", dino.x, dino.y + 15); 
+                cactus.x -= cactus.speed; if(cactus.x < -30) { cactus.x = 600 + Math.random() * 200; score++; scoreEl.innerText = score; cactus.speed += 0.1; }
+                ctx.fillText("🌵", cactus.x, 125);
+                if(dino.x < cactus.x + 20 && dino.x + 20 > cactus.x && dino.y > dino.ground - 20) {
+                    gameRunning = false; ctx.fillStyle = 'white'; ctx.font = 'bold 24px monospace'; ctx.textAlign = 'center'; ctx.fillText("GAME OVER", 300, 60); ctx.font = '16px monospace'; ctx.fillText("TAP TO RESTART", 300, 90); document.getElementById('gameTip').innerText = "点击屏幕重试 / TAP TO RESTART";
+                } else requestAnimationFrame(update);
             }
-
-            // 初始画面文字
-            ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = 'bold 20px monospace'; ctx.textAlign = 'center';
-            ctx.fillText("READY?", 300, 70);
+            ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = 'bold 20px monospace'; ctx.textAlign = 'center'; ctx.fillText("TAP TO START", 300, 70);
         }
-
         window.onload = init;
     </script>
 </body>
