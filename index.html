@@ -45,13 +45,14 @@
         .btn-gold:active:not(:disabled) { transform: translateY(0); }
         .btn-gold:disabled { background: #334155; color: #94a3b8; cursor: not-allowed; box-shadow: none; }
         
-        /* 🔴 结算按钮专用样式 (确保它是亮的) */
+        /* 🔴 绿色结算按钮 (强力高亮) */
         .btn-green {
             background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
             color: #064e3b; transition: all 0.3s ease; font-weight: 800; border: none;
+            cursor: pointer !important; /* 强制手型 */
+            pointer-events: auto !important; /* 强制响应点击 */
         }
-        .btn-green:hover:not(:disabled) { box-shadow: 0 0 20px rgba(74, 222, 128, 0.4); transform: scale(1.02); }
-        .btn-green:disabled { background: #334155; color: #94a3b8; cursor: not-allowed; }
+        .btn-green:hover { box-shadow: 0 0 25px rgba(74, 222, 128, 0.6); transform: scale(1.02); }
 
         .pot-glow { text-shadow: 0 0 25px rgba(255, 215, 0, 0.4); }
         .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); }
@@ -106,7 +107,7 @@
                     <span id="timerText" class="text-xs text-gray-500 font-mono">--- IDLE ---</span>
                 </div>
 
-                <button id="finalizeBtn" onclick="finalizePayout()" disabled class="w-full py-4 rounded-xl font-bold text-lg border-2 border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10 transition disabled:opacity-30 disabled:border-gray-700 disabled:text-gray-600">
+                <button id="finalizeBtn" disabled class="w-full py-4 rounded-xl font-bold text-lg border-2 border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10 transition disabled:opacity-30 disabled:border-gray-700 disabled:text-gray-600">
                     <div class="flex items-center justify-center gap-2">
                         <i class="fas fa-download"></i> 结算领币 (Finalize)
                     </div>
@@ -146,7 +147,8 @@
         ];
 
         let provider, signer, contract, readOnlyContract;
-        
+        let globalUserAddress = ""; // 🔴 全局变量存地址，防止缩写报错
+
         const el = {
             pot: document.getElementById('potValue'),
             connectView: document.getElementById('connectView'),
@@ -158,11 +160,13 @@
             user: document.getElementById('userDisplay')
         };
 
-        // 1. 初始化
+        // 🔴 强力绑定点击事件
+        el.finalize.onclick = finalizePayout;
+
         async function init() {
             if(typeof ethers === 'undefined') {
                 el.pot.innerText = "Error";
-                alert("加载失败：请刷新页面重试 (Network Error)");
+                alert("加载失败：请刷新页面重试");
                 return;
             }
             try {
@@ -187,9 +191,8 @@
             setTimeout(loopPot, 3000);
         }
 
-        // 2. 连接钱包
         async function connectWallet() {
-            if(!window.ethereum) return alert("请在钱包浏览器中打开此网页！");
+            if(!window.ethereum) return alert("请在钱包浏览器中打开！");
             try {
                 await window.ethereum.request({ method: 'eth_requestAccounts' });
                 await switchToBSC();
@@ -199,59 +202,62 @@
                 contract = new ethers.Contract(CA, ABI, signer);
                 
                 const addr = await signer.getAddress();
+                globalUserAddress = addr; // 🔴 存入全局变量
+
                 el.connectView.classList.add('hidden');
                 el.miningView.classList.remove('hidden');
                 el.user.innerText = addr.slice(0,6) + "..." + addr.slice(-4);
 
-                checkUserStatus(addr); // 🟢 关键：连接成功后立即检查状态
+                checkUserStatus(); 
 
             } catch(e) { alert("连接失败: " + e.message); }
         }
 
-        // 3. 智能状态检测 (核心修复！)
-        async function checkUserStatus(addr) {
+        // 🟢 修复后的检测逻辑
+        async function checkUserStatus() {
+            if(!globalUserAddress) return;
             try {
                 const curId = await contract.currentCycleId();
-                const lastId = await contract.lastClaimedCycleId(addr);
+                const lastId = await contract.lastClaimedCycleId(globalUserAddress); // 使用完整地址
                 const cycleData = await contract.currentCycle(); 
-                const isFinalized = cycleData[3]; // 这是一个布尔值
+                const isFinalized = cycleData[3];
 
-                console.log("Cycle Check:", curId.toString(), lastId.toString(), isFinalized);
+                console.log("Check:", curId.toString(), lastId.toString(), isFinalized);
 
-                // 🟢 逻辑：如果(本轮ID == 用户最后参与ID) 并且 (本轮还没结算)
-                // 这意味着：用户已经Submit了，正在等待Finalize
+                // 如果本轮已参与且未结算
                 if(curId.eq(lastId) && !isFinalized) {
                     
-                    // 1. 禁用“抢夺”
+                    // 禁用抢夺
                     el.submit.disabled = true;
-                    el.submit.innerHTML = "<i class='fas fa-times'></i> 本轮已参与 (Wait)";
-                    el.submit.className = "w-full py-4 rounded-xl text-lg shadow-lg relative overflow-hidden bg-gray-700 text-gray-400 cursor-not-allowed"; // 变灰
+                    el.submit.innerHTML = "<i class='fas fa-check'></i> 本轮已抢 (Wait)";
+                    el.submit.className = "w-full py-4 rounded-xl text-lg shadow-lg relative overflow-hidden bg-gray-700 text-gray-400 cursor-not-allowed";
 
-                    // 2. 启用“结算” (并变成绿色，超醒目)
+                    // 🔴 暴力启用结算
                     el.finalize.disabled = false;
-                    el.finalize.className = "w-full py-4 rounded-xl font-bold text-lg btn-green shadow-lg"; // 变绿
-                    el.finalize.innerHTML = "<div class='flex items-center justify-center gap-2'><i class='fas fa-check-circle'></i> 立即结算 (Finalize)</div>";
+                    el.finalize.removeAttribute("disabled"); // 彻底移除属性
+                    el.finalize.className = "w-full py-4 rounded-xl font-bold text-lg btn-green shadow-lg"; 
+                    el.finalize.innerHTML = "<div class='flex items-center justify-center gap-2'><i class='fas fa-download'></i> 立即结算 (点击领钱)</div>";
 
                     el.timer.innerText = ">>> 等待结算 (Action Required) <<<";
                     el.timer.style.color = "#4ade80";
-                    setStatus("检测到您已参与，请点击下方绿色按钮结算！", "success");
+                    setStatus("🔥 检测到收益未领取，请点击绿色按钮！", "success");
 
                 } else {
-                    // 正常状态：可以抢夺
+                    // 正常状态
                     el.submit.disabled = false;
+                    el.submit.removeAttribute("disabled");
                     el.submit.innerHTML = "<div class='relative z-10 flex items-center justify-center gap-2'><i class='fas fa-hammer'></i> 立即抢夺 (Submit)</div>";
-                    el.submit.className = "btn-gold w-full py-4 rounded-xl text-lg shadow-lg relative overflow-hidden"; // 变回金色
+                    el.submit.className = "btn-gold w-full py-4 rounded-xl text-lg shadow-lg relative overflow-hidden";
 
                     el.finalize.disabled = true;
-                    el.finalize.className = "w-full py-4 rounded-xl font-bold text-lg border-2 border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10 transition disabled:opacity-30 disabled:border-gray-700 disabled:text-gray-600"; // 变灰
-
+                    el.finalize.className = "w-full py-4 rounded-xl font-bold text-lg border-2 border-yellow-500/30 text-yellow-500 hover:bg-yellow-500/10 transition disabled:opacity-30 disabled:border-gray-700 disabled:text-gray-600";
+                    
                     el.timer.innerText = "--- 空闲 Idle ---";
                     el.timer.style.color = "#94a3b8";
                 }
             } catch(e) { console.error(e); }
         }
 
-        // 4. 抢夺逻辑
         async function submitClaim() {
             try {
                 setStatus("正在请求钱包签名...", "loading");
@@ -259,35 +265,36 @@
                 setStatus("交易上链中...请稍候", "loading");
                 await tx.wait();
                 
-                // 成功后，手动切换状态
-                checkUserStatus(el.user.innerText); 
-                setStatus("锁定成功！请等待4秒后点击结算...", "success");
+                checkUserStatus();
+                setStatus("锁定成功！等待4秒...", "success");
                 
                 let t = 4;
                 const iv = setInterval(() => {
                     t--;
                     if(t <= 0) {
                         clearInterval(iv);
-                        checkUserStatus(el.user.innerText); // 再次确认状态，确保结算按钮亮起
+                        checkUserStatus(); // 再次刷新，确保按钮变绿
                     }
                 }, 1000);
             } catch(e) { handleErr(e); }
         }
 
-        // 5. 结算逻辑
         async function finalizePayout() {
+            // 🔴 调试反馈
+            console.log("点击了结算");
+            if(!contract) return alert("请先连接钱包");
+
             try {
-                setStatus("正在发起结算...", "loading");
+                setStatus("正在发起结算...请在钱包确认", "loading");
                 const tx = await contract.finalizePayout();
+                setStatus("等待区块确认...", "loading");
                 await tx.wait();
                 
                 setStatus("🎉 成功！收益已到账", "success");
                 el.finalize.disabled = true; 
 
-                // 2秒后强制刷新，开始新一轮
-                setTimeout(() => {
-                    location.reload();
-                }, 2000);
+                // 2秒后强制刷新
+                setTimeout(() => { location.reload(); }, 2000);
 
             } catch(e) { handleErr(e); }
         }
@@ -328,10 +335,10 @@
             if(e.reason) m = e.reason;
             if(e.message && e.message.includes("user rejected")) m = "用户取消";
             if(m.includes("Window")) m = "太快了！请等待倒计时";
-            if(m.includes("Already submitted")) m = "本轮您已参与！请点击绿色结算按钮";
+            if(m.includes("Already submitted")) m = "本轮您已参与！请点击绿色按钮结算";
             
             setStatus("❌ " + m, "error");
-            if(m.includes("已参与") || m.includes("Already")) checkUserStatus(el.user.innerText);
+            if(m.includes("已参与") || m.includes("Already")) checkUserStatus();
         }
 
         function copyCA() {
