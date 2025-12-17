@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -33,6 +32,28 @@
             min-height: 100vh;
             margin: 0;
             overflow: hidden;
+        }
+
+        /* --- 新增：返回按钮样式 --- */
+        .back-nav {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            text-decoration: none;
+            color: var(--neon-pink);
+            border: 1px solid var(--neon-pink);
+            padding: 8px 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            background: rgba(0,0,0,0.6);
+            transition: all 0.3s;
+            z-index: 100;
+            text-transform: uppercase;
+        }
+        .back-nav:hover {
+            background: var(--neon-pink);
+            color: #000;
+            box-shadow: 0 0 15px var(--neon-pink);
         }
 
         .cyber-container {
@@ -133,6 +154,8 @@
     </style>
 </head>
 <body>
+
+    <a href="../index.html" class="back-nav">[ &lt;&lt; RETURN // BASE ]</a>
 
     <div class="cyber-container">
         <div class="corner-decoration top-left"></div>
