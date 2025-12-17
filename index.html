@@ -1,297 +1,268 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KANG Mining</title>
-    
-    <script src="https://cdn.staticfile.org/ethers/5.7.2/ethers.umd.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIFT // CYBER TERMINAL</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js" type="application/javascript"></script>
     <style>
+        /* --- 赛博朋克核心变量 --- */
+        :root {
+            --neon-pink: #ff2a6d;
+            --neon-blue: #05d9e8;
+            --neon-green: #39ff14;
+            --dark-bg: #010113;
+            --panel-bg: rgba(16, 20, 40, 0.85);
+        }
+
+        /* 全局样式 */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0f172a;
-            background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-                              radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-                              radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-            background-attachment: fixed;
-            background-size: cover;
-            color: #fff;
-            min-height: 100vh;
+            background-color: var(--dark-bg);
+            background-image: 
+                linear-gradient(rgba(5, 217, 232, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(5, 217, 232, 0.1) 1px, transparent 1px),
+                radial-gradient(circle at 50% 50%, rgba(1, 1, 19, 0) 0%, var(--dark-bg) 100%);
+            background-size: 30px 30px, 30px 30px, 100% 100%;
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 1rem;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
         }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-            width: 100%; max-width: 400px; border-radius: 24px; padding: 2rem;
-            position: relative; z-index: 10;
-        }
-        
-        /* 🟡 抢夺按钮 (常亮) */
-        .btn-gold {
-            background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%);
-            color: #3e2723; transition: all 0.3s ease; font-weight: 800; border: none;
-            cursor: pointer; pointer-events: auto; opacity: 1 !important;
-        }
-        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(253, 185, 49, 0.3); }
-        
-        /* 🟢 结算按钮 (常亮) */
-        .btn-green {
-            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
-            color: #064e3b; transition: all 0.3s ease; font-weight: 800; border: none;
-            cursor: pointer; pointer-events: auto; opacity: 1 !important;
-        }
-        .btn-green:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(74, 222, 128, 0.4); }
 
-        .pot-glow { text-shadow: 0 0 25px rgba(255, 215, 0, 0.4); }
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); }
-        .mini-btn {
-            background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8;
-            padding: 10px; border-radius: 12px; font-size: 0.75rem; cursor: pointer; transition: 0.2s;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+        .cyber-container {
+            background: var(--panel-bg);
+            padding: 2.5rem;
+            border: 2px solid var(--neon-blue);
+            border-radius: 4px;
+            box-shadow: 
+                0 0 20px rgba(5, 217, 232, 0.4), 
+                inset 0 0 20px rgba(5, 217, 232, 0.2);
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            position: relative;
+            backdrop-filter: blur(5px);
         }
-        .mini-btn:hover { background: rgba(255,255,255,0.1); color: #FFD700; border-color: #FFD700; }
-        .hidden { display: none !important; }
-        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .corner-decoration {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 2px solid var(--neon-pink);
+            box-shadow: 0 0 10px var(--neon-pink);
+        }
+        .top-left { top: -5px; left: -5px; border-right: none; border-bottom: none; }
+        .top-right { top: -5px; right: -5px; border-left: none; border-bottom: none; }
+        .bottom-left { bottom: -5px; left: -5px; border-right: none; border-top: none; }
+        .bottom-right { bottom: -5px; right: -5px; border-left: none; border-top: none; }
+
+        h1 {
+            margin-bottom: 0.5rem;
+            color: var(--neon-blue);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+        
+        .pot-box {
+            background: #000;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border: 1px solid #333;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+        }
+        .pot-box::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                transparent 0px, transparent 2px,
+                rgba(0, 255, 0, 0.1) 3px, rgba(0, 255, 0, 0.1) 4px
+            );
+            pointer-events: none;
+        }
+
+        .pot-title { 
+            font-size: 0.8rem; color: var(--neon-blue); text-transform: uppercase; 
+            margin-bottom: 10px;
+        }
+        .pot-value { 
+            font-size: 2.5rem; 
+            font-weight: bold; 
+            color: var(--neon-green);
+            text-shadow: 0 0 15px var(--neon-green);
+            font-family: monospace;
+        }
+        .unit { color: #64748b; font-size: 0.9rem; }
+
+        .cyber-button {
+            background: transparent;
+            border: 2px solid var(--neon-pink);
+            color: var(--neon-pink);
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 10px rgba(255, 42, 109, 0.4);
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+        }
+
+        .cyber-button:hover {
+            background: var(--neon-pink);
+            color: #000;
+            box-shadow: 0 0 30px var(--neon-pink);
+        }
+        .cyber-button:active { transform: scale(0.98); }
+
+        .status { margin-top: 1.5rem; font-size: 0.9rem; min-height: 20px; color: var(--neon-blue); }
+        .link { margin-top: 2rem; font-size: 0.8rem; color: #94a3b8; border-top: 1px solid #333; padding-top: 1rem; }
+        a { color: var(--neon-blue); text-decoration: none; }
     </style>
 </head>
 <body>
 
-    <div class="absolute top-8 w-full text-center z-0">
-        <h1 class="text-3xl font-extrabold tracking-tight text-white/90">KANG <span class="text-yellow-500">PROTOCOL</span></h1>
-        <p class="text-[10px] text-gray-400 mt-1 tracking-[0.2em] uppercase">Fair Launch • Win or Share</p>
-    </div>
+    <div class="cyber-container">
+        <div class="corner-decoration top-left"></div>
+        <div class="corner-decoration top-right"></div>
+        <div class="corner-decoration bottom-left"></div>
+        <div class="corner-decoration bottom-right"></div>
 
-    <div class="glass-card fade-in">
-        
-        <div class="text-center mb-8">
-            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Current Reward Pot</div>
-            <div class="relative">
-                <div id="potValue" class="text-5xl font-black text-white pot-glow font-mono">LOADING</div>
-                <div class="text-xs font-bold text-yellow-500 mt-2">PENDING KANG TOKENS</div>
-            </div>
+        <h1>LIFT // PROTOCOL</h1>
+
+        <div class="pot-box">
+            <div class="pot-title">[ CURRENT REWARD POOL ]</div>
+            <div class="pot-value" id="potDisplay">LOADING...</div>
+            <div class="unit">/// PENDING LIFT TOKENS ///</div>
         </div>
 
-        <div id="connectView" class="text-center">
-            <button onclick="connectWallet()" class="btn-gold w-full py-4 rounded-xl text-lg shadow-lg flex items-center justify-center gap-2">
-                <i class="fas fa-wallet"></i> 连接钱包 (Connect)
-            </button>
-            <p class="text-xs text-gray-500 mt-4">Connect wallet to start mining</p>
+        <button id="actionBtn" class="cyber-button" onclick="connectWallet()">INITIALIZE UPLINK</button>
+        <div class="status" id="statusMsg">>> WAITING FOR CONNECTION... <<</div>
+
+        <div class="link">
+            CONTRACT NET_ID: <a href="https://bscscan.com/address/0x47b93c2a0920BBe10eFc7854b8FD04a02E85d031" target="_blank">0x47b9...d031</a>
         </div>
-
-        <div id="miningView" class="hidden space-y-4">
-            <div id="statusLog" class="bg-gray-800/50 rounded-lg p-3 text-xs text-center text-gray-300 font-mono border border-gray-700/50">
-                准备就绪 System Ready
-            </div>
-
-            <div class="grid gap-3">
-                <button id="submitBtn" onclick="submitClaim()" class="btn-gold w-full py-4 rounded-xl text-lg shadow-lg relative overflow-hidden">
-                    <div class="relative z-10 flex items-center justify-center gap-2">
-                        <i class="fas fa-hammer"></i> 立即抢夺 (Submit)
-                    </div>
-                </button>
-
-                <div class="text-center py-1">
-                    <span id="timerText" class="text-xs text-gray-500 font-mono">--- IDLE ---</span>
-                </div>
-
-                <button id="finalizeBtn" onclick="finalizePayout()" class="btn-green w-full py-4 rounded-xl font-bold text-lg shadow-lg">
-                    <div class="flex items-center justify-center gap-2">
-                        <i class="fas fa-download"></i> 结算领币 (Finalize)
-                    </div>
-                </button>
-            </div>
-
-            <div class="text-center pt-2">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/20 text-[10px] text-gray-400 font-mono">
-                    <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                    <span id="userDisplay">0x00...0000</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="action-grid">
-            <div class="mini-btn" onclick="copyCA()">
-                <i class="fas fa-copy"></i>
-                <span>复制合约地址</span>
-            </div>
-            <div class="mini-btn" onclick="openBscScan()">
-                <i class="fas fa-external-link-alt"></i>
-                <span>查看 BscScan</span>
-            </div>
-        </div>
-
     </div>
 
     <script>
-        const CA = "0x65a762e8B7639596dbFBCcd9A541d44B0CF67762";
+        const CONTRACT_ADDRESS = "0x47b93c2a0920BBe10eFc7854b8FD04a02E85d031";
         const ABI = [
-            "function submitClaim() public",
-            "function finalizePayout() public",
+            "function claim() public returns (bool)",
             "function checkCurrentPot() public view returns (uint256)"
         ];
 
-        let provider, signer, contract, readOnlyContract;
-        
-        const el = {
-            pot: document.getElementById('potValue'),
-            connectView: document.getElementById('connectView'),
-            miningView: document.getElementById('miningView'),
-            status: document.getElementById('statusLog'),
-            timer: document.getElementById('timerText'),
-            submit: document.getElementById('submitBtn'),
-            finalize: document.getElementById('finalizeBtn'),
-            user: document.getElementById('userDisplay')
-        };
-
-        async function init() {
-            if(typeof ethers === 'undefined') {
-                el.pot.innerText = "Error";
-                alert("加载失败：请刷新页面重试");
-                return;
-            }
-            try {
-                const rpc = new ethers.providers.JsonRpcProvider("https://bsc-dataseed.binance.org/");
-                readOnlyContract = new ethers.Contract(CA, ABI, rpc);
-                loopPot();
-            } catch(e) { console.error(e); }
-
-            if(window.ethereum) {
-                const acc = await window.ethereum.request({method:'eth_accounts'});
-                if(acc.length > 0) connectWallet();
-            }
-        }
-
-        async function loopPot() {
-            if(readOnlyContract) {
-                try {
-                    const v = await readOnlyContract.checkCurrentPot();
-                    el.pot.innerText = parseFloat(ethers.utils.formatUnits(v, 18)).toFixed(4);
-                } catch(e) {}
-            }
-            setTimeout(loopPot, 3000);
-        }
+        let provider, signer, contract;
 
         async function connectWallet() {
-            if(!window.ethereum) return alert("请在钱包浏览器中打开！");
-            try {
-                await window.ethereum.request({ method: 'eth_requestAccounts' });
-                await switchToBSC();
+            // 调试信息：点按钮必须有反应
+            console.log("Button Clicked!");
 
+            if (typeof window.ethereum === 'undefined') {
+                alert("错误：未检测到钱包！\n请确保你已安装 MetaMask 插件。\n如果你在手机上，请在钱包App的浏览器里打开此页面。");
+                return;
+            }
+
+            try {
+                setStatus(">> ATTEMPTING CONNECTION... CHECK WALLET <<", "var(--neon-blue)");
+                
+                // 初始化 Provider
                 provider = new ethers.providers.Web3Provider(window.ethereum);
+                
+                // 请求账号权限
+                await provider.send("eth_requestAccounts", []);
                 signer = provider.getSigner();
-                contract = new ethers.Contract(CA, ABI, signer);
+                const address = await signer.getAddress();
                 
-                const addr = await signer.getAddress();
-                
-                el.connectView.classList.add('hidden');
-                el.miningView.classList.remove('hidden');
-                el.user.innerText = addr.slice(0,6) + "..." + addr.slice(-4);
-                
-                // 这里移除了checkUserStatus，因为按钮默认全亮
-
-            } catch(e) { alert("连接失败: " + e.message); }
-        }
-
-        async function submitClaim() {
-            try {
-                setStatus("正在请求钱包签名...", "loading");
-                const tx = await contract.submitClaim();
-                setStatus("交易上链中...请稍候", "loading");
-                await tx.wait();
-                
-                setStatus("锁定成功！等待 4 秒安全期...", "success");
-                
-                let t = 4;
-                const iv = setInterval(() => {
-                    t--;
-                    if(t <= 0) {
-                        clearInterval(iv);
-                        setStatus("请点击下方绿色按钮结算！", "warn");
-                    } else {
-                        el.timer.innerText = `等待区块确认... ${t}s`;
+                // 检查网络 (BSC)
+                const network = await provider.getNetwork();
+                if (network.chainId !== 56) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0x38' }],
+                        });
+                        // 切换后刷新 Provider
+                        provider = new ethers.providers.Web3Provider(window.ethereum);
+                        signer = provider.getSigner();
+                    } catch (e) {
+                        alert("请切换到 BNB Smart Chain 网络！");
+                        setStatus(">> NETWORK ERROR <<", "var(--neon-pink)");
+                        return;
                     }
-                }, 1000);
-            } catch(e) { handleErr(e); }
+                }
+
+                contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+
+                // 更新按钮状态
+                document.getElementById("actionBtn").innerText = ">>> EXECUTE CLAIM <<<";
+                document.getElementById("actionBtn").onclick = claimTokens;
+                document.getElementById("actionBtn").style.borderColor = "var(--neon-green)";
+                document.getElementById("actionBtn").style.color = "var(--neon-green)";
+                
+                setStatus(">> UPLINK ESTABLISHED: " + address.substring(0,6) + "... <<", "var(--neon-green)");
+
+                setInterval(updatePot, 2000); 
+                updatePot();
+
+            } catch (error) {
+                console.error(error);
+                alert("连接失败：" + error.message);
+                setStatus(">> CONNECTION FAILED <<", "var(--neon-pink)");
+            }
         }
 
-        async function finalizePayout() {
+        async function claimTokens() {
+            if (!contract) return;
             try {
-                setStatus("正在发起结算...请在钱包确认", "loading");
-                const tx = await contract.finalizePayout();
-                setStatus("等待区块确认...", "loading");
-                await tx.wait();
-                
-                setStatus("🎉 成功！收益已到账", "success");
-                
-                // 2秒后强制刷新页面，防止状态卡死
-                setTimeout(() => { location.reload(); }, 2000);
-
-            } catch(e) { handleErr(e); }
-        }
-
-        async function switchToBSC() {
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: '0x38' }],
-                });
-            } catch (err) {
-                if (err.code === 4902) {
-                    await window.ethereum.request({
-                        method: 'wallet_addEthereumChain',
-                        params: [{
-                            chainId: '0x38',
-                            chainName: 'Binance Smart Chain',
-                            nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
-                            rpcUrls: ['https://bsc-dataseed.binance.org/'],
-                            blockExplorerUrls: ['https://bscscan.com/'],
-                        }],
-                    });
+                setStatus(">> INITIATING TRANSACTION... <<", "var(--neon-blue)");
+                const tx = await contract.claim();
+                setStatus(">> TX SENT. AWAITING CONFIRMATION... <<", "var(--neon-blue)");
+                await tx.wait(); 
+                setStatus(">> SUCCESS: TOKENS SECURED <<", "var(--neon-green)");
+                updatePot();
+            } catch (error) {
+                console.error(error);
+                if (error.code === 4001) {
+                    setStatus(">> USER CANCELLED <<", "#64748b");
+                } else {
+                    alert("抢币失败！可能是被别人抢先了，或者是Gas费不足。");
+                    setStatus(">> EXECUTION FAILED <<", "var(--neon-pink)");
                 }
             }
         }
 
-        function setStatus(msg, type) {
-            el.status.innerText = msg;
-            el.status.className = "rounded-lg p-3 text-xs text-center font-mono border transition-all ";
-            if(type === 'loading') el.status.className += "bg-blue-900/30 text-blue-300 border-blue-800 animate-pulse";
-            else if(type === 'success') el.status.className += "bg-green-900/30 text-green-300 border-green-800";
-            else if(type === 'warn') el.status.className += "bg-yellow-900/30 text-yellow-300 border-yellow-800";
-            else el.status.className += "bg-gray-800/50 text-gray-300 border-gray-700/50";
+        async function updatePot() {
+            if (!contract) return;
+            try {
+                const potRaw = await contract.checkCurrentPot();
+                const potFormatted = ethers.utils.formatUnits(potRaw, 18);
+                let displayStr = parseFloat(potFormatted).toFixed(4);
+                if (displayStr.length < 8) {
+                     while(displayStr.length < 8) { displayStr = "0" + displayStr; }
+                }
+                document.getElementById("potDisplay").innerText = displayStr;
+            } catch (error) {
+                console.log("读取奖池失败", error);
+            }
         }
 
-        function handleErr(e) {
-            let m = "交易失败";
-            if(e.reason) m = e.reason;
-            if(e.message && e.message.includes("user rejected")) m = "用户取消";
-            if(m.includes("Window")) m = "太快了！请等待倒计时";
-            if(m.includes("Already submitted")) m = "本轮您已参与！请直接点【结算领币】";
-            
-            setStatus("❌ " + m, "error");
+        function setStatus(msg, color) {
+            const el = document.getElementById("statusMsg");
+            el.innerText = msg;
+            if(color) el.style.color = color;
         }
-
-        function copyCA() {
-            navigator.clipboard.writeText(CA);
-            alert("✅ 地址已复制");
-        }
-        function openBscScan() {
-            window.open(`https://bscscan.com/address/${CA}`, '_blank');
-        }
-
-        window.onload = init;
     </script>
 </body>
 </html>
