@@ -27,7 +27,7 @@
             align-items: center;
             justify-content: center;
             padding: 1rem;
-            position: relative; /* 确保返回按钮绝对定位是相对于body */
+            position: relative; 
         }
         .glass-card {
             background: rgba(255, 255, 255, 0.05);
@@ -70,9 +70,9 @@
 </head>
 <body>
 
-    <a href="../index.html" class="absolute top-4 left-4 z-50 flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-sm font-semibold text-white/80 transition-all backdrop-blur-md">
+    <a href="../index.html" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-6 py-3 rounded-full bg-black/40 hover:bg-black/60 border border-white/20 text-sm font-semibold text-white/90 transition-all backdrop-blur-md shadow-2xl">
         <i class="fas fa-arrow-left"></i>
-        <span>Back</span>
+        <span>Back to Portal</span>
     </a>
 
     <div class="absolute top-8 w-full text-center z-0">
@@ -80,7 +80,9 @@
         <p class="text-[10px] text-gray-400 mt-1 tracking-[0.2em] uppercase">Fair Launch • Win or Share</p>
     </div>
 
-    <div class="glass-card fade-in mt-12"> <div class="text-center mb-8">
+    <div class="glass-card fade-in">
+        
+        <div class="text-center mb-8">
             <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Current Reward Pot</div>
             <div class="relative">
                 <div id="potValue" class="text-5xl font-black text-white pot-glow font-mono">LOADING</div>
