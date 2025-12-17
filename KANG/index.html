@@ -182,7 +182,7 @@
             }
             try {
                 // 使用官方 RPC 初始化只读合约 (查奖池)
-                const rpc = new ethers.providers.JsonRpcProvider("https://bsc-dataseed.binance.org/");
+                const rpc = new ethers.providers.JsonRpcProvider("https://rpc.ankr.com/bsc");
                 readOnlyGameContract = new ethers.Contract(GAME_CA, GAME_ABI, rpc);
                 loopPot();
             } catch(e) { console.error(e); }
