@@ -27,7 +27,6 @@
             align-items: center;
             justify-content: center;
             padding: 1rem;
-            position: relative; 
         }
         .glass-card {
             background: rgba(255, 255, 255, 0.05);
@@ -70,11 +69,6 @@
 </head>
 <body>
 
-    <a href="../index.html" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-6 py-3 rounded-full bg-black/40 hover:bg-black/60 border border-white/20 text-sm font-semibold text-white/90 transition-all backdrop-blur-md shadow-2xl">
-        <i class="fas fa-arrow-left"></i>
-        <span>Back to Portal</span>
-    </a>
-
     <div class="absolute top-8 w-full text-center z-0">
         <h1 class="text-3xl font-extrabold tracking-tight text-white/90">KANG <span class="text-yellow-500">PROTOCOL</span></h1>
         <p class="text-[10px] text-gray-400 mt-1 tracking-[0.2em] uppercase">Fair Launch • Win or Share</p>
@@ -98,6 +92,11 @@
         </div>
 
         <div id="miningView" class="hidden space-y-4">
+            <div class="flex justify-between items-center bg-black/20 px-4 py-2 rounded-lg border border-white/5">
+                <span class="text-xs text-gray-400">My Balance:</span>
+                <span id="myBalance" class="text-sm font-bold text-white font-mono">0.00 KANG</span>
+            </div>
+
             <div id="statusLog" class="bg-gray-800/50 rounded-lg p-3 text-xs text-center text-gray-300 font-mono border border-gray-700/50">
                 准备就绪 System Ready
             </div>
@@ -129,27 +128,39 @@
         </div>
 
         <div class="action-grid">
-            <div class="mini-btn" onclick="copyCA()">
+            <div class="mini-btn" onclick="copyTokenAddress()">
                 <i class="fas fa-copy"></i>
-                <span>复制合约地址</span>
+                <span>复制代币地址</span>
             </div>
-            <div class="mini-btn" onclick="openBscScan()">
-                <i class="fas fa-external-link-alt"></i>
-                <span>查看 BscScan</span>
+            <div class="mini-btn" onclick="addTokenToWallet()">
+                <i class="fas fa-plus-circle"></i>
+                <span>导入钱包</span>
             </div>
         </div>
 
     </div>
 
     <script>
-        const CA = "0x65a762e8B7639596dbFBCcd9A541d44B0CF67762";
-        const ABI = [
+        // --- 1. 双合约配置 ---
+        // 代币合约 (金库): 用于查询余额、添加钱包
+        const TOKEN_CA = "0x313F64B887138Db63EE8EdC5d356D40c7EDCe446";
+        // 游戏合约 (机器): 用于执行挖矿逻辑
+        const GAME_CA = "0xD647f5baEa30c7b038251959671DBFe68672bd30";
+
+        const GAME_ABI = [
             "function submitClaim() public",
             "function finalizePayout() public",
             "function checkCurrentPot() public view returns (uint256)"
         ];
 
-        let provider, signer, contract, readOnlyContract;
+        const TOKEN_ABI = [
+            "function balanceOf(address) view returns (uint256)",
+            "function decimals() view returns (uint8)",
+            "function symbol() view returns (string)"
+        ];
+
+        let provider, signer, gameContract, tokenContract, readOnlyGameContract;
+        let userAddress;
         
         const el = {
             pot: document.getElementById('potValue'),
@@ -159,7 +170,8 @@
             timer: document.getElementById('timerText'),
             submit: document.getElementById('submitBtn'),
             finalize: document.getElementById('finalizeBtn'),
-            user: document.getElementById('userDisplay')
+            user: document.getElementById('userDisplay'),
+            balance: document.getElementById('myBalance')
         };
 
         async function init() {
@@ -169,8 +181,9 @@
                 return;
             }
             try {
+                // 使用官方 RPC 初始化只读合约 (查奖池)
                 const rpc = new ethers.providers.JsonRpcProvider("https://bsc-dataseed.binance.org/");
-                readOnlyContract = new ethers.Contract(CA, ABI, rpc);
+                readOnlyGameContract = new ethers.Contract(GAME_CA, GAME_ABI, rpc);
                 loopPot();
             } catch(e) { console.error(e); }
 
@@ -181,9 +194,9 @@
         }
 
         async function loopPot() {
-            if(readOnlyContract) {
+            if(readOnlyGameContract) {
                 try {
-                    const v = await readOnlyContract.checkCurrentPot();
+                    const v = await readOnlyGameContract.checkCurrentPot();
                     el.pot.innerText = parseFloat(ethers.utils.formatUnits(v, 18)).toFixed(4);
                 } catch(e) {}
             }
@@ -198,23 +211,37 @@
 
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 signer = provider.getSigner();
-                contract = new ethers.Contract(CA, ABI, signer);
+                userAddress = await signer.getAddress();
                 
-                const addr = await signer.getAddress();
+                // 初始化两个合约 (带签名)
+                gameContract = new ethers.Contract(GAME_CA, GAME_ABI, signer);
+                tokenContract = new ethers.Contract(TOKEN_CA, TOKEN_ABI, signer);
                 
                 el.connectView.classList.add('hidden');
                 el.miningView.classList.remove('hidden');
-                el.user.innerText = addr.slice(0,6) + "..." + addr.slice(-4);
+                el.user.innerText = userAddress.slice(0,6) + "..." + userAddress.slice(-4);
                 
-                // 这里移除了checkUserStatus，因为按钮默认全亮
+                refreshBalance(); // 立即查余额
 
             } catch(e) { alert("连接失败: " + e.message); }
+        }
+
+        // 查询并显示余额
+        async function refreshBalance() {
+            if(tokenContract && userAddress) {
+                try {
+                    const rawBal = await tokenContract.balanceOf(userAddress);
+                    const bal = parseFloat(ethers.utils.formatUnits(rawBal, 18)).toFixed(2);
+                    el.balance.innerText = bal + " KANG";
+                } catch(e) { console.error(e); }
+            }
         }
 
         async function submitClaim() {
             try {
                 setStatus("正在请求钱包签名...", "loading");
-                const tx = await contract.submitClaim();
+                // 调用游戏合约
+                const tx = await gameContract.submitClaim();
                 setStatus("交易上链中...请稍候", "loading");
                 await tx.wait();
                 
@@ -236,14 +263,15 @@
         async function finalizePayout() {
             try {
                 setStatus("正在发起结算...请在钱包确认", "loading");
-                const tx = await contract.finalizePayout();
+                // 调用游戏合约
+                const tx = await gameContract.finalizePayout();
                 setStatus("等待区块确认...", "loading");
                 await tx.wait();
                 
                 setStatus("🎉 成功！收益已到账", "success");
+                refreshBalance(); // 结算成功后刷新余额
                 
-                // 2秒后强制刷新页面，防止状态卡死
-                setTimeout(() => { location.reload(); }, 2000);
+                setTimeout(() => { location.reload(); }, 2500);
 
             } catch(e) { handleErr(e); }
         }
@@ -289,12 +317,30 @@
             setStatus("❌ " + m, "error");
         }
 
-        function copyCA() {
-            navigator.clipboard.writeText(CA);
-            alert("✅ 地址已复制");
+        function copyTokenAddress() {
+            navigator.clipboard.writeText(TOKEN_CA);
+            setStatus("✅ 代币地址已复制，请在钱包添加", "success");
+            setTimeout(() => setStatus("准备就绪 System Ready", "normal"), 3000);
         }
-        function openBscScan() {
-            window.open(`https://bscscan.com/address/${CA}`, '_blank');
+
+        // 一键把代币添加到 MetaMask
+        async function addTokenToWallet() {
+            if(!window.ethereum) return;
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_watchAsset',
+                    params: {
+                        type: 'ERC20',
+                        options: {
+                            address: TOKEN_CA,
+                            symbol: 'KANG',
+                            decimals: 18,
+                        },
+                    },
+                });
+            } catch (error) {
+                console.error(error);
+            }
         }
 
         window.onload = init;
