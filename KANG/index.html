@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KANG Mining (CN Mode)</title>
+    <title>KANG Mining (Auto)</title>
     
     <script src="https://cdn.staticfile.org/ethers/5.7.2/ethers.umd.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -38,7 +38,6 @@
             position: relative; z-index: 10;
         }
         
-        /* 按钮样式 */
         .btn-gold {
             background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%);
             color: #3e2723; transition: all 0.3s ease; font-weight: 800; border: none;
@@ -70,7 +69,7 @@
 
     <div class="absolute top-8 w-full text-center z-0">
         <h1 class="text-3xl font-extrabold tracking-tight text-white/90">KANG <span class="text-yellow-500">PROTOCOL</span></h1>
-        <p class="text-[10px] text-gray-400 mt-1 tracking-[0.2em] uppercase">Wallet Mode • No Proxy Needed</p>
+        <p class="text-[10px] text-gray-400 mt-1 tracking-[0.2em] uppercase">Auto Connect • Wallet Mode</p>
     </div>
 
     <div class="glass-card fade-in">
@@ -78,26 +77,26 @@
         <div class="text-center mb-8">
             <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Current Reward Pot</div>
             <div class="relative">
-                <div id="potValue" class="text-4xl font-black text-white pot-glow font-mono">Connect First</div>
+                <div id="potValue" class="text-5xl font-black text-white pot-glow font-mono">...</div>
                 <div class="text-xs font-bold text-yellow-500 mt-2">PENDING KANG TOKENS</div>
             </div>
         </div>
 
-        <div id="connectView" class="text-center">
+        <div id="connectView" class="text-center hidden">
             <button onclick="connectWallet()" class="btn-gold w-full py-4 rounded-xl text-lg shadow-lg flex items-center justify-center gap-2">
-                <i class="fas fa-wallet"></i> 启动连接 (Initialize)
+                <i class="fas fa-wallet"></i> 手动连接 (Connect)
             </button>
-            <p class="text-xs text-gray-500 mt-4">Click to load data via Wallet</p>
+            <p class="text-xs text-gray-500 mt-4">Auto-connect failed, please click manually</p>
         </div>
 
         <div id="miningView" class="hidden space-y-4">
             <div class="flex justify-between items-center bg-black/20 px-4 py-2 rounded-lg border border-white/5">
                 <span class="text-xs text-gray-400">My Balance:</span>
-                <span id="myBalance" class="text-sm font-bold text-white font-mono">--- KANG</span>
+                <span id="myBalance" class="text-sm font-bold text-white font-mono">---</span>
             </div>
 
             <div id="statusLog" class="bg-gray-800/50 rounded-lg p-3 text-xs text-center text-gray-300 font-mono border border-gray-700/50">
-                连接成功 Link Established
+                正在同步数据 Syncing...
             </div>
 
             <div class="grid gap-3">
@@ -171,58 +170,81 @@
             balance: document.getElementById('myBalance')
         };
 
-        // 【修改点】去除所有的自动初始化，只保留点击事件
-        // 这样不点击就不会发起网络请求，也就不会被墙
-        
-        async function connectWallet() {
-            if(!window.ethereum) return alert("请在钱包浏览器中打开 (如 TP/OKX/MetaMask)");
-            
+        // --- 核心：页面加载完成后，立刻尝试连接 ---
+        window.onload = async () => {
+            // 延迟 500ms 确保钱包注入完成
+            setTimeout(autoConnect, 500);
+        };
+
+        async function autoConnect() {
+            if(!window.ethereum) {
+                // 没检测到钱包，显示手动连接按钮（或者报错提示）
+                el.connectView.classList.remove('hidden');
+                el.pot.innerText = "No Wallet";
+                return;
+            }
+
             try {
-                el.pot.innerText = "Connecting...";
+                // 1. 尝试静默获取账户 (如果用户以前连过，这步不需要弹窗)
+                let accounts = await window.ethereum.request({ method: 'eth_accounts' });
                 
-                // 1. 请求连接
-                await window.ethereum.request({ method: 'eth_requestAccounts' });
-                
-                // 2. 切换到 BSC (必须步骤)
-                await switchToBSC();
+                if (accounts.length === 0) {
+                    // 2. 如果没连过，强制弹出请求窗口 (这就是你要的效果)
+                    // 注意：在某些电脑浏览器上这可能会被拦截，但在 TP/OKX 手机钱包里通常是允许的
+                    accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                }
 
-                // 3. 【核心修改】直接使用 Web3Provider (走钱包通道)
-                // 不再使用 JsonRpcProvider (走直接联网通道)
-                provider = new ethers.providers.Web3Provider(window.ethereum);
-                signer = provider.getSigner();
-                userAddress = await signer.getAddress();
-                
-                // 4. 初始化合约 (全走 Signer)
-                gameContract = new ethers.Contract(GAME_CA, GAME_ABI, signer);
-                tokenContract = new ethers.Contract(TOKEN_CA, TOKEN_ABI, signer);
-                
-                // 5. 切换 UI
-                el.connectView.classList.add('hidden');
-                el.miningView.classList.remove('hidden');
-                el.user.innerText = userAddress.slice(0,6) + "..." + userAddress.slice(-4);
-                
-                // 6. 开始获取数据 (这时候钱包通了，数据就能取到了)
-                refreshBalance(); 
-                loopPot(); 
+                // 3. 开始连接流程
+                await initGame(accounts[0]);
 
-            } catch(e) { 
-                console.error(e);
-                alert("连接失败: " + e.message); 
+            } catch (e) {
+                console.error("自动连接被拒绝或失败", e);
+                // 失败了（比如用户点了取消），那就把手动按钮显示出来，让用户有机会再点
+                el.connectView.classList.remove('hidden');
                 el.pot.innerText = "Connect Failed";
             }
         }
 
-        // 轮询奖池 (完全依赖钱包连接)
+        // 手动点击连接（备用方案）
+        async function connectWallet() {
+             try {
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                await initGame(accounts[0]);
+             } catch(e) { alert(e.message); }
+        }
+
+        async function initGame(account) {
+            try {
+                await switchToBSC();
+
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                userAddress = account;
+
+                gameContract = new ethers.Contract(GAME_CA, GAME_ABI, signer);
+                tokenContract = new ethers.Contract(TOKEN_CA, TOKEN_ABI, signer);
+
+                // 隐藏连接按钮，显示游戏界面
+                el.connectView.classList.add('hidden');
+                el.miningView.classList.remove('hidden');
+                
+                el.user.innerText = userAddress.slice(0,6) + "..." + userAddress.slice(-4);
+                el.status.innerText = "已连接 Connected";
+                
+                refreshBalance();
+                loopPot();
+
+            } catch(e) { console.error(e); }
+        }
+
         async function loopPot() {
             if(gameContract) {
                 try {
                     const v = await gameContract.checkCurrentPot();
                     el.pot.innerText = parseFloat(ethers.utils.formatUnits(v, 18)).toFixed(4);
-                } catch(e) {
-                    // 如果网络闪断，也不要报错，静默失败即可
-                }
+                } catch(e) {}
             }
-            setTimeout(loopPot, 3000); // 每3秒通过钱包查一次
+            setTimeout(loopPot, 3000);
         }
 
         async function refreshBalance() {
@@ -303,15 +325,13 @@
             let m = "交易失败";
             if(e.reason) m = e.reason;
             if(e.message && e.message.includes("user rejected")) m = "用户取消";
-            if(m.includes("Window")) m = "太快了！请等待倒计时";
-            if(m.includes("Already submitted")) m = "本轮您已参与！请直接点【结算领币】";
             setStatus("❌ " + m, "error");
         }
 
         function copyTokenAddress() {
             navigator.clipboard.writeText(TOKEN_CA);
             setStatus("✅ 代币地址已复制", "success");
-            setTimeout(() => setStatus("连接成功 Link Established", "normal"), 3000);
+            setTimeout(() => setStatus("已连接 Connected", "normal"), 3000);
         }
 
         async function addTokenToWallet() {
