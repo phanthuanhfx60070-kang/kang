@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KANG Mining</title>
+    <title>KANG Mining (CN Mode)</title>
     
     <script src="https://cdn.staticfile.org/ethers/5.7.2/ethers.umd.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -38,7 +38,7 @@
             position: relative; z-index: 10;
         }
         
-        /* 🟡 抢夺按钮 (常亮) */
+        /* 按钮样式 */
         .btn-gold {
             background: linear-gradient(135deg, #FFD700 0%, #FDB931 100%);
             color: #3e2723; transition: all 0.3s ease; font-weight: 800; border: none;
@@ -46,7 +46,6 @@
         }
         .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(253, 185, 49, 0.3); }
         
-        /* 🟢 结算按钮 (常亮) */
         .btn-green {
             background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
             color: #064e3b; transition: all 0.3s ease; font-weight: 800; border: none;
@@ -71,7 +70,7 @@
 
     <div class="absolute top-8 w-full text-center z-0">
         <h1 class="text-3xl font-extrabold tracking-tight text-white/90">KANG <span class="text-yellow-500">PROTOCOL</span></h1>
-        <p class="text-[10px] text-gray-400 mt-1 tracking-[0.2em] uppercase">Fair Launch • Win or Share</p>
+        <p class="text-[10px] text-gray-400 mt-1 tracking-[0.2em] uppercase">Wallet Mode • No Proxy Needed</p>
     </div>
 
     <div class="glass-card fade-in">
@@ -79,26 +78,26 @@
         <div class="text-center mb-8">
             <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Current Reward Pot</div>
             <div class="relative">
-                <div id="potValue" class="text-5xl font-black text-white pot-glow font-mono">LOADING</div>
+                <div id="potValue" class="text-4xl font-black text-white pot-glow font-mono">Connect First</div>
                 <div class="text-xs font-bold text-yellow-500 mt-2">PENDING KANG TOKENS</div>
             </div>
         </div>
 
         <div id="connectView" class="text-center">
             <button onclick="connectWallet()" class="btn-gold w-full py-4 rounded-xl text-lg shadow-lg flex items-center justify-center gap-2">
-                <i class="fas fa-wallet"></i> 连接钱包 (Connect)
+                <i class="fas fa-wallet"></i> 启动连接 (Initialize)
             </button>
-            <p class="text-xs text-gray-500 mt-4">Connect wallet to start mining</p>
+            <p class="text-xs text-gray-500 mt-4">Click to load data via Wallet</p>
         </div>
 
         <div id="miningView" class="hidden space-y-4">
             <div class="flex justify-between items-center bg-black/20 px-4 py-2 rounded-lg border border-white/5">
                 <span class="text-xs text-gray-400">My Balance:</span>
-                <span id="myBalance" class="text-sm font-bold text-white font-mono">0.00 KANG</span>
+                <span id="myBalance" class="text-sm font-bold text-white font-mono">--- KANG</span>
             </div>
 
             <div id="statusLog" class="bg-gray-800/50 rounded-lg p-3 text-xs text-center text-gray-300 font-mono border border-gray-700/50">
-                准备就绪 System Ready
+                连接成功 Link Established
             </div>
 
             <div class="grid gap-3">
@@ -141,10 +140,8 @@
     </div>
 
     <script>
-        // --- 1. 双合约配置 ---
-        // 代币合约 (金库): 用于查询余额、添加钱包
+        // --- 1. 配置地址 ---
         const TOKEN_CA = "0x313F64B887138Db63EE8EdC5d356D40c7EDCe446";
-        // 游戏合约 (机器): 用于执行挖矿逻辑
         const GAME_CA = "0xD647f5baEa30c7b038251959671DBFe68672bd30";
 
         const GAME_ABI = [
@@ -159,7 +156,7 @@
             "function symbol() view returns (string)"
         ];
 
-        let provider, signer, gameContract, tokenContract, readOnlyGameContract;
+        let provider, signer, gameContract, tokenContract;
         let userAddress;
         
         const el = {
@@ -174,79 +171,78 @@
             balance: document.getElementById('myBalance')
         };
 
-        async function init() {
-            if(typeof ethers === 'undefined') {
-                el.pot.innerText = "Error";
-                alert("加载失败：请刷新页面重试");
-                return;
-            }
-            try {
-                // 使用官方 RPC 初始化只读合约 (查奖池)
-                const rpc = new ethers.providers.JsonRpcProvider("https://rpc.ankr.com/bsc");
-                readOnlyGameContract = new ethers.Contract(GAME_CA, GAME_ABI, rpc);
-                loopPot();
-            } catch(e) { console.error(e); }
-
-            if(window.ethereum) {
-                const acc = await window.ethereum.request({method:'eth_accounts'});
-                if(acc.length > 0) connectWallet();
-            }
-        }
-
-        async function loopPot() {
-            if(readOnlyGameContract) {
-                try {
-                    const v = await readOnlyGameContract.checkCurrentPot();
-                    el.pot.innerText = parseFloat(ethers.utils.formatUnits(v, 18)).toFixed(4);
-                } catch(e) {}
-            }
-            setTimeout(loopPot, 3000);
-        }
-
+        // 【修改点】去除所有的自动初始化，只保留点击事件
+        // 这样不点击就不会发起网络请求，也就不会被墙
+        
         async function connectWallet() {
-            if(!window.ethereum) return alert("请在钱包浏览器中打开！");
+            if(!window.ethereum) return alert("请在钱包浏览器中打开 (如 TP/OKX/MetaMask)");
+            
             try {
+                el.pot.innerText = "Connecting...";
+                
+                // 1. 请求连接
                 await window.ethereum.request({ method: 'eth_requestAccounts' });
+                
+                // 2. 切换到 BSC (必须步骤)
                 await switchToBSC();
 
+                // 3. 【核心修改】直接使用 Web3Provider (走钱包通道)
+                // 不再使用 JsonRpcProvider (走直接联网通道)
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 signer = provider.getSigner();
                 userAddress = await signer.getAddress();
                 
-                // 初始化两个合约 (带签名)
+                // 4. 初始化合约 (全走 Signer)
                 gameContract = new ethers.Contract(GAME_CA, GAME_ABI, signer);
                 tokenContract = new ethers.Contract(TOKEN_CA, TOKEN_ABI, signer);
                 
+                // 5. 切换 UI
                 el.connectView.classList.add('hidden');
                 el.miningView.classList.remove('hidden');
                 el.user.innerText = userAddress.slice(0,6) + "..." + userAddress.slice(-4);
                 
-                refreshBalance(); // 立即查余额
+                // 6. 开始获取数据 (这时候钱包通了，数据就能取到了)
+                refreshBalance(); 
+                loopPot(); 
 
-            } catch(e) { alert("连接失败: " + e.message); }
+            } catch(e) { 
+                console.error(e);
+                alert("连接失败: " + e.message); 
+                el.pot.innerText = "Connect Failed";
+            }
         }
 
-        // 查询并显示余额
+        // 轮询奖池 (完全依赖钱包连接)
+        async function loopPot() {
+            if(gameContract) {
+                try {
+                    const v = await gameContract.checkCurrentPot();
+                    el.pot.innerText = parseFloat(ethers.utils.formatUnits(v, 18)).toFixed(4);
+                } catch(e) {
+                    // 如果网络闪断，也不要报错，静默失败即可
+                }
+            }
+            setTimeout(loopPot, 3000); // 每3秒通过钱包查一次
+        }
+
         async function refreshBalance() {
             if(tokenContract && userAddress) {
                 try {
                     const rawBal = await tokenContract.balanceOf(userAddress);
                     const bal = parseFloat(ethers.utils.formatUnits(rawBal, 18)).toFixed(2);
                     el.balance.innerText = bal + " KANG";
-                } catch(e) { console.error(e); }
+                } catch(e) {}
             }
         }
 
         async function submitClaim() {
             try {
                 setStatus("正在请求钱包签名...", "loading");
-                // 调用游戏合约
                 const tx = await gameContract.submitClaim();
                 setStatus("交易上链中...请稍候", "loading");
                 await tx.wait();
                 
                 setStatus("锁定成功！等待 4 秒安全期...", "success");
-                
                 let t = 4;
                 const iv = setInterval(() => {
                     t--;
@@ -263,16 +259,12 @@
         async function finalizePayout() {
             try {
                 setStatus("正在发起结算...请在钱包确认", "loading");
-                // 调用游戏合约
                 const tx = await gameContract.finalizePayout();
                 setStatus("等待区块确认...", "loading");
                 await tx.wait();
-                
                 setStatus("🎉 成功！收益已到账", "success");
-                refreshBalance(); // 结算成功后刷新余额
-                
+                refreshBalance();
                 setTimeout(() => { location.reload(); }, 2500);
-
             } catch(e) { handleErr(e); }
         }
 
@@ -313,17 +305,15 @@
             if(e.message && e.message.includes("user rejected")) m = "用户取消";
             if(m.includes("Window")) m = "太快了！请等待倒计时";
             if(m.includes("Already submitted")) m = "本轮您已参与！请直接点【结算领币】";
-            
             setStatus("❌ " + m, "error");
         }
 
         function copyTokenAddress() {
             navigator.clipboard.writeText(TOKEN_CA);
-            setStatus("✅ 代币地址已复制，请在钱包添加", "success");
-            setTimeout(() => setStatus("准备就绪 System Ready", "normal"), 3000);
+            setStatus("✅ 代币地址已复制", "success");
+            setTimeout(() => setStatus("连接成功 Link Established", "normal"), 3000);
         }
 
-        // 一键把代币添加到 MetaMask
         async function addTokenToWallet() {
             if(!window.ethereum) return;
             try {
@@ -338,12 +328,8 @@
                         },
                     },
                 });
-            } catch (error) {
-                console.error(error);
-            }
+            } catch (error) { console.error(error); }
         }
-
-        window.onload = init;
     </script>
 </body>
 </html>
