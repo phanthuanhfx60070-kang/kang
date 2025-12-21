@@ -214,7 +214,6 @@
             const saved = localStorage.getItem('sentinel_v6_strategies');
             if(saved) { strategies = JSON.parse(saved); renderStrategies(); }
             
-            // 从 LocalStorage 恢复 API 配置
             const k = localStorage.getItem('s_api_k');
             const s = localStorage.getItem('s_api_s');
             const b = localStorage.getItem('s_api_b');
@@ -249,7 +248,7 @@
                 addLimit: parseFloat(document.getElementById('botAdd').value),
                 isLive: false,
                 state: 'IDLE',
-                simPnl: 0,
+                pnl: 0, // 初始化盈亏，防止渲染报错
                 entryPrice: 0,
                 totalProfit: 0,
                 currentAmtU: 0,
@@ -261,7 +260,6 @@
 
         function saveData() { localStorage.setItem('sentinel_v6_strategies', JSON.stringify(strategies)); }
 
-        // 配置保存逻辑 (增强反馈)
         function saveKeys() {
             const k = document.getElementById('apiKey').value.trim();
             const s = document.getElementById('apiSecret').value.trim();
@@ -284,7 +282,6 @@
             addLog("API 配置成功并持久化保存", "text-emerald-400 font-black");
         }
 
-        // 测试连接逻辑
         async function testConnection() {
             const apiBase = document.getElementById('apiBase').value.trim().replace(/\/$/, "");
             const label = document.getElementById('connTestLabel');
@@ -311,7 +308,6 @@
             const bot = strategies.find(s => s.id === id);
             if(!bot) return;
             
-            // 严谨检查：即使 Input 没填，如果存储里有也可以开启
             const savedK = localStorage.getItem('s_api_k');
             if(!savedK && !bot.isLive) {
                 showTab('account');
@@ -319,13 +315,12 @@
             }
             
             bot.isLive = !bot.isLive;
-            addLog(`策略 ${bot.name} 开关：${bot.isLive ? '实盘实弹' : '模拟测试'}`, bot.isLive ? 'text-red-500 font-bold' : 'text-blue-400');
+            addLog(`策略 ${bot.name} 开关：${bot.isLive ? '实盘实弹' : '模拟测试'}`, bot.isLive ? 'text-red-400 font-bold' : 'text-blue-400');
             saveData(); renderStrategies();
         }
 
         function deleteBot(id) { strategies = strategies.filter(s => s.id !== id); saveData(); renderStrategies(); }
 
-        // 行情循环
         async function startMainLoop() {
             setInterval(async () => {
                 if(strategies.length === 0) return;
@@ -356,7 +351,6 @@
                     document.getElementById('globalStatus').className = "text-[9px] font-bold text-emerald-400 uppercase tracking-widest";
                     updateLogic();
                     
-                    // 如果有实盘在跑，顺便刷新余额
                     if(strategies.some(s => s.isLive)) refreshBalance();
                 } catch (e) {
                     document.getElementById('globalStatus').innerText = "Network Blocked";
@@ -404,87 +398,96 @@
             const { price, rsi15, rsi1h, pump, volRatio } = feed;
             if(bot.state === 'IDLE') {
                 if(rsi15 >= bot.rsiLimit && rsi1h >= bot.rsiLimit && pump >= bot.pumpLimit && volRatio >= bot.volLimit) {
-                    bot.state = 'HOLDING'; bot.entryPrice = price; bot.currentAmtU = 1; bot.hasAdded = false;
-                    addLog(`[Sim] ${bot.name} 触发条件开多单`, 'text-blue-400');
+                    bot.state = 'HOLDING'; bot.entryPrice = price; bot.currentAmtU = 1; bot.hasAdded = false; bot.pnl = 0;
+                    addLog(`[Sim] ${bot.name} 触发共振 - 开空`, 'text-blue-400 font-bold');
                 }
             } else {
+                // 做空收益公式: (入场价 - 当前价) / 入场价 * 杠杆
                 bot.pnl = (bot.entryPrice - price) / bot.entryPrice * bot.lev * 100;
                 if(bot.pnl >= bot.tp) {
-                    bot.totalProfit += (bot.currentAmtU * bot.tp / 100); bot.state = 'IDLE';
-                    addLog(`[Sim] ${bot.name} 达到目标止盈`, 'text-emerald-400');
+                    bot.totalProfit += (bot.currentAmtU * bot.tp / 100); bot.state = 'IDLE'; bot.pnl = 0;
+                    addLog(`[Sim] ${bot.name} 达到目标止盈`, 'text-emerald-400 font-bold');
                 } else if(bot.pnl <= bot.addLimit && !bot.hasAdded) {
+                    // 模拟补仓摊平均价
                     bot.entryPrice = (bot.entryPrice * 1 + price * 2) / 3; bot.currentAmtU = 3; bot.hasAdded = true;
                     addLog(`[Sim] ${bot.name} 触发阈值补仓`, 'text-orange-400');
-                } else if(bot.pnl <= -100) { bot.totalProfit -= bot.currentAmtU; bot.state = 'IDLE'; }
+                } else if(bot.pnl <= -100) { 
+                    bot.totalProfit -= bot.currentAmtU; bot.state = 'IDLE'; bot.pnl = 0;
+                    addLog(`[Sim] ${bot.name} 模拟爆仓`, 'text-red-500 font-black');
+                }
             }
         }
 
         function renderStrategies() {
             const grid = document.getElementById('strategyGrid');
             if(strategies.length === 0) return;
-            grid.innerHTML = '';
+            
+            // 缓存当前的 HTML，只有在数据变化时才全量渲染，减少闪烁
+            let newHTML = '';
 
             strategies.forEach(bot => {
                 const feed = marketFeed[bot.symbol] || { price: 0, rsi15: 0, rsi1h: 0, pump: 0, volRatio: 0 };
-                const card = document.createElement('div');
-                card.className = `app-card p-5 relative overflow-hidden transition-all shadow-md ${bot.state === 'HOLDING' ? 'ring-1 ring-white/10' : ''}`;
+                // 确保 pnl 是数字，防止 toFixed 报错
+                const displayPnl = (bot.pnl || 0).toFixed(2);
                 
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-5">
-                        <div class="flex-1">
+                newHTML += `
+                    <div class="app-card p-5 relative overflow-hidden transition-all shadow-md ${bot.state === 'HOLDING' ? 'ring-1 ring-white/10' : ''}">
+                        <div class="flex justify-between items-start mb-5">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <h3 class="font-black text-sm italic text-slate-100 truncate w-24 uppercase tracking-tighter">${bot.name}</h3>
+                                    <span class="px-2 py-0.5 rounded-[5px] text-[8px] font-black uppercase ${bot.isLive ? 'status-tag-live' : 'status-tag-sim'}">
+                                        ${bot.isLive ? '● Live' : 'Sim Mode'}
+                                    </span>
+                                </div>
+                                <div class="mt-2 flex flex-wrap gap-1.5">
+                                    <span class="px-1.5 py-0.5 bg-slate-800 text-slate-400 text-[8px] font-black rounded uppercase">${bot.symbol} ${bot.lev}X</span>
+                                    <span class="text-[8px] text-blue-500 font-bold uppercase">RSI:${bot.rsiLimit} Pump:${bot.pumpLimit}% Vol:${bot.volLimit}x</span>
+                                </div>
+                            </div>
                             <div class="flex items-center gap-2">
-                                <h3 class="font-black text-sm italic text-slate-100 truncate w-24">${bot.name}</h3>
-                                <span class="px-2 py-0.5 rounded-[5px] text-[8px] font-black uppercase ${bot.isLive ? 'status-tag-live' : 'status-tag-sim'}">
-                                    ${bot.isLive ? '● Live' : 'Sim Mode'}
-                                </span>
+                                <label class="relative inline-flex items-center cursor-pointer scale-75">
+                                    <input type="checkbox" ${bot.isLive ? 'checked' : ''} onchange="toggleMode(${bot.id})" class="sr-only peer">
+                                    <div class="w-7 h-4 bg-slate-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-red-500"></div>
+                                </label>
+                                <button onclick="deleteBot(${bot.id})" class="text-slate-700 hover:text-red-500 p-1 transition-colors">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/></svg>
+                                </button>
                             </div>
-                            <div class="mt-2 flex flex-wrap gap-1.5">
-                                <span class="px-1.5 py-0.5 bg-slate-800 text-slate-400 text-[8px] font-black rounded uppercase">${bot.symbol} ${bot.lev}X</span>
-                                <span class="text-[8px] text-blue-500 font-bold uppercase">RSI:${bot.rsiLimit} Pump:${bot.pumpLimit}% Vol:${bot.volLimit}x</span>
+                        </div>
+
+                        <div class="bg-black/30 p-4 rounded-xl mb-4 border border-white/5 flex justify-between items-center text-center">
+                            <div class="flex-1">
+                                <p class="indicator-mini mb-1">Live ROI</p>
+                                <p class="text-lg font-black tabular-nums ${bot.pnl >= 0 ? 'profit' : 'loss'}">
+                                    ${bot.state === 'HOLDING' ? displayPnl + '%' : '0.00%'}
+                                </p>
+                            </div>
+                            <div class="w-px h-6 bg-slate-800 mx-2"></div>
+                            <div class="flex-1">
+                                <p class="indicator-mini mb-1">累计利润</p>
+                                <p class="text-lg font-black text-slate-100">${(bot.totalProfit || 0).toFixed(2)}<span class="text-[9px] opacity-40 ml-0.5">U</span></p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <label class="relative inline-flex items-center cursor-pointer scale-75">
-                                <input type="checkbox" ${bot.isLive ? 'checked' : ''} onchange="toggleMode(${bot.id})" class="sr-only peer">
-                                <div class="w-7 h-4 bg-slate-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-red-500"></div>
-                            </label>
-                            <button onclick="deleteBot(${bot.id})" class="text-slate-700 hover:text-red-500 p-1 transition-colors">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/></svg>
-                            </button>
-                        </div>
-                    </div>
 
-                    <div class="bg-black/30 p-4 rounded-xl mb-4 border border-white/5 flex justify-between items-center text-center">
-                        <div class="flex-1">
-                            <p class="indicator-mini mb-1">Live ROI</p>
-                            <p class="text-lg font-black tabular-nums ${bot.pnl >= 0 ? 'profit' : 'loss'}">
-                                ${bot.state === 'HOLDING' ? bot.pnl.toFixed(2) + '%' : '0.00%'}
-                            </p>
-                        </div>
-                        <div class="w-px h-6 bg-slate-800 mx-2"></div>
-                        <div class="flex-1">
-                            <p class="indicator-mini mb-1">累计利润</p>
-                            <p class="text-lg font-black text-slate-100">${bot.totalProfit.toFixed(2)}<span class="text-[9px] opacity-40 ml-0.5">U</span></p>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-2 bg-[#161a1e] p-2.5 rounded-xl text-[9px] font-bold">
-                        <div class="text-center">
-                            <span class="text-slate-500 block uppercase mb-1">15m RSI</span>
-                            <span class="${feed.rsi15 >= bot.rsiLimit ? 'text-red-500 animate-pulse' : 'text-slate-200'}">${feed.rsi15.toFixed(1)}</span>
-                        </div>
-                        <div class="text-center border-x border-white/5">
-                            <span class="text-slate-500 block uppercase mb-1">1h 涨幅</span>
-                            <span class="${feed.pump >= bot.pumpLimit ? 'text-red-500' : 'text-slate-200'}">${feed.pump.toFixed(1)}%</span>
-                        </div>
-                        <div class="text-center">
-                            <span class="text-slate-500 block uppercase mb-1">量能激增</span>
-                            <span class="${feed.volRatio >= bot.volLimit ? 'text-red-500' : 'text-slate-200'}">${feed.volRatio.toFixed(1)}x</span>
+                        <div class="grid grid-cols-3 gap-2 bg-[#161a1e] p-2.5 rounded-xl text-[9px] font-bold">
+                            <div class="text-center">
+                                <span class="text-slate-500 block uppercase mb-1">15m RSI</span>
+                                <span class="${feed.rsi15 >= bot.rsiLimit ? 'text-red-500 animate-pulse' : 'text-slate-200'}">${feed.rsi15.toFixed(1)}</span>
+                            </div>
+                            <div class="text-center border-x border-white/5">
+                                <span class="text-slate-500 block uppercase mb-1">1h 涨幅</span>
+                                <span class="${feed.pump >= bot.pumpLimit ? 'text-red-500' : 'text-slate-200'}">${feed.pump.toFixed(1)}%</span>
+                            </div>
+                            <div class="text-center">
+                                <span class="text-slate-500 block uppercase mb-1">量能倍数</span>
+                                <span class="${feed.volRatio >= bot.volLimit ? 'text-red-500' : 'text-slate-200'}">${feed.volRatio.toFixed(1)}x</span>
+                            </div>
                         </div>
                     </div>
                 `;
-                grid.appendChild(card);
             });
+            grid.innerHTML = newHTML;
         }
 
         function addLog(msg, colorClass = 'text-slate-500') {
