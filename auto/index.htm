@@ -63,7 +63,7 @@
                     <p id="totalSimPnl" class="text-xl font-black profit">0.00 U</p>
                 </div>
                 <div class="app-card p-4 text-center border-l-4 border-red-500 shadow-lg">
-                    <p class="indicator-mini uppercase">账户余额 (USDT)</p>
+                    <p class="indicator-mini uppercase">实盘账户余额 (USDT)</p>
                     <p id="liveBalance" class="text-xl font-black text-slate-200">--</p>
                 </div>
             </div>
@@ -205,6 +205,9 @@
         </div>
     </div>
 
+    <!-- 告警音 -->
+    <audio id="alert" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
     <script>
         let strategies = [];
         let marketFeed = {}; 
@@ -248,7 +251,7 @@
                 addLimit: parseFloat(document.getElementById('botAdd').value),
                 isLive: false,
                 state: 'IDLE',
-                pnl: 0, // 初始化盈亏，防止渲染报错
+                pnl: 0,
                 entryPrice: 0,
                 totalProfit: 0,
                 currentAmtU: 0,
@@ -283,7 +286,7 @@
         }
 
         async function testConnection() {
-            const apiBase = document.getElementById('apiBase').value.trim().replace(/\/$/, "");
+            const apiBase = (document.getElementById('apiBase').value || DEFAULT_API_BASE).trim().replace(/\/$/, "");
             const label = document.getElementById('connTestLabel');
             label.innerText = "Testing...";
             label.className = "text-[9px] font-black uppercase text-blue-400 tracking-tighter";
@@ -315,7 +318,7 @@
             }
             
             bot.isLive = !bot.isLive;
-            addLog(`策略 ${bot.name} 开关：${bot.isLive ? '实盘实弹' : '模拟测试'}`, bot.isLive ? 'text-red-400 font-bold' : 'text-blue-400');
+            addLog(`策略 ${bot.name} 模式：${bot.isLive ? '实盘执行' : '模拟测试'}`, bot.isLive ? 'text-red-500 font-bold' : 'text-blue-400');
             saveData(); renderStrategies();
         }
 
@@ -382,14 +385,19 @@
             return 100 - (100 / (1 + (ag / (al || 1e-9))));
         }
 
-        function updateLogic() {
+        async function updateLogic() {
             let totalSim = 0;
-            strategies.forEach(bot => {
+            for(const bot of strategies) {
                 const feed = marketFeed[bot.symbol];
-                if(!feed) return;
-                if(!bot.isLive) processSimBot(bot, feed);
+                if(!feed) continue;
+                
+                if(bot.isLive) {
+                    await processLiveBot(bot, feed);
+                } else {
+                    processSimBot(bot, feed);
+                }
                 totalSim += bot.totalProfit;
-            });
+            }
             document.getElementById('totalSimPnl').innerText = totalSim.toFixed(2) + " U";
             renderStrategies();
         }
@@ -400,15 +408,14 @@
                 if(rsi15 >= bot.rsiLimit && rsi1h >= bot.rsiLimit && pump >= bot.pumpLimit && volRatio >= bot.volLimit) {
                     bot.state = 'HOLDING'; bot.entryPrice = price; bot.currentAmtU = 1; bot.hasAdded = false; bot.pnl = 0;
                     addLog(`[Sim] ${bot.name} 触发共振 - 开空`, 'text-blue-400 font-bold');
+                    document.getElementById('alert').play();
                 }
             } else {
-                // 做空收益公式: (入场价 - 当前价) / 入场价 * 杠杆
                 bot.pnl = (bot.entryPrice - price) / bot.entryPrice * bot.lev * 100;
                 if(bot.pnl >= bot.tp) {
                     bot.totalProfit += (bot.currentAmtU * bot.tp / 100); bot.state = 'IDLE'; bot.pnl = 0;
                     addLog(`[Sim] ${bot.name} 达到目标止盈`, 'text-emerald-400 font-bold');
                 } else if(bot.pnl <= bot.addLimit && !bot.hasAdded) {
-                    // 模拟补仓摊平均价
                     bot.entryPrice = (bot.entryPrice * 1 + price * 2) / 3; bot.currentAmtU = 3; bot.hasAdded = true;
                     addLog(`[Sim] ${bot.name} 触发阈值补仓`, 'text-orange-400');
                 } else if(bot.pnl <= -100) { 
@@ -418,31 +425,104 @@
             }
         }
 
+        // --- 实盘下单执行逻辑 ---
+        async function processLiveBot(bot, feed) {
+            const { price, rsi15, rsi1h, pump, volRatio } = feed;
+            
+            try {
+                // 1. 获取实盘持仓
+                const positions = await signedRequest('GET', '/fapi/v2/positionRisk', { symbol: bot.symbol });
+                const pos = positions.find(p => p.symbol === bot.symbol);
+                const currentAmt = parseFloat(pos.positionAmt); // 实盘空单数量为负数
+                const entry = parseFloat(pos.entryPrice);
+                
+                if (currentAmt === 0) {
+                    // --- 实盘未持仓：判断是否入场 ---
+                    bot.state = 'IDLE';
+                    bot.pnl = 0;
+                    if (rsi15 >= bot.rsiLimit && rsi1h >= bot.rsiLimit && pump >= bot.pumpLimit && volRatio >= bot.volLimit) {
+                        addLog(`[Live] ${bot.name} 满足共振条件，准备实盘下单...`, 'text-red-400 font-black');
+                        
+                        // 计算下单量 (按 1U * 杠杆)
+                        let qty = Math.floor((1 * bot.lev) / price);
+                        if(qty < 1) qty = 1; // 针对低价币取整保护
+                        
+                        const order = await placeOrder(bot.symbol, 'SELL', qty, bot.lev);
+                        if(order.orderId) {
+                            addLog(`[Live] 实盘开空成功！数量: ${qty}`, 'text-emerald-400 font-black');
+                            document.getElementById('alert').play();
+                        }
+                    }
+                } else {
+                    // --- 实盘持仓中：监控盈亏执行策略 ---
+                    bot.state = 'HOLDING';
+                    // 空单 ROI 计算
+                    const roi = (entry - price) / entry * bot.lev * 100;
+                    bot.pnl = roi;
+                    bot.entryPrice = entry;
+
+                    // A. 止盈逻辑
+                    if (roi >= bot.tp) {
+                        addLog(`[Live] 实盘收益 ${roi.toFixed(1)}% 达标止盈中...`, 'text-emerald-400 font-black');
+                        const closeOrder = await placeOrder(bot.symbol, 'BUY', Math.abs(currentAmt), bot.lev);
+                        if(closeOrder.orderId) addLog(`[Live] 实盘止盈平仓成功`, 'text-emerald-400 font-black');
+                    }
+                    
+                    // B. 补仓逻辑 (此处模拟加仓 2U)
+                    if (roi <= bot.addLimit && !bot.hasAdded) {
+                        addLog(`[Live] 实盘亏损 ${roi.toFixed(1)}% 触发补仓...`, 'text-orange-400 font-black');
+                        let addQty = Math.floor((2 * bot.lev) / price);
+                        const addOrder = await placeOrder(bot.symbol, 'SELL', addQty, bot.lev);
+                        if(addOrder.orderId) {
+                            bot.hasAdded = true;
+                            addLog(`[Live] 实盘补仓成功`, 'text-orange-400 font-black');
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Live Logic Error:", e);
+            }
+        }
+
+        async function placeOrder(symbol, side, qty, leverage) {
+            try {
+                // 设置杠杆
+                await signedRequest('POST', '/fapi/v1/leverage', { symbol, leverage });
+                // 下市价单
+                return await signedRequest('POST', '/fapi/v1/order', {
+                    symbol,
+                    side,
+                    type: 'MARKET',
+                    quantity: qty
+                });
+            } catch (e) {
+                addLog(`[Trade Error] 下单失败: ${e.message}`, 'text-red-500');
+                return {};
+            }
+        }
+
         function renderStrategies() {
             const grid = document.getElementById('strategyGrid');
             if(strategies.length === 0) return;
             
-            // 缓存当前的 HTML，只有在数据变化时才全量渲染，减少闪烁
             let newHTML = '';
-
             strategies.forEach(bot => {
                 const feed = marketFeed[bot.symbol] || { price: 0, rsi15: 0, rsi1h: 0, pump: 0, volRatio: 0 };
-                // 确保 pnl 是数字，防止 toFixed 报错
                 const displayPnl = (bot.pnl || 0).toFixed(2);
                 
                 newHTML += `
-                    <div class="app-card p-5 relative overflow-hidden transition-all shadow-md ${bot.state === 'HOLDING' ? 'ring-1 ring-white/10' : ''}">
+                    <div class="app-card p-5 relative overflow-hidden transition-all shadow-md ${bot.state === 'HOLDING' ? 'ring-1 ring-white/20' : ''}">
                         <div class="flex justify-between items-start mb-5">
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
                                     <h3 class="font-black text-sm italic text-slate-100 truncate w-24 uppercase tracking-tighter">${bot.name}</h3>
-                                    <span class="px-2 py-0.5 rounded-[5px] text-[8px] font-black uppercase ${bot.isLive ? 'status-tag-live' : 'status-tag-sim'}">
+                                    <span class="px-2 py-0.5 rounded-[5px] text-[8px] font-black uppercase ${bot.isLive ? 'status-tag-live animate-pulse' : 'status-tag-sim'}">
                                         ${bot.isLive ? '● Live' : 'Sim Mode'}
                                     </span>
                                 </div>
                                 <div class="mt-2 flex flex-wrap gap-1.5">
                                     <span class="px-1.5 py-0.5 bg-slate-800 text-slate-400 text-[8px] font-black rounded uppercase">${bot.symbol} ${bot.lev}X</span>
-                                    <span class="text-[8px] text-blue-500 font-bold uppercase">RSI:${bot.rsiLimit} Pump:${bot.pumpLimit}% Vol:${bot.volLimit}x</span>
+                                    <span class="text-[8px] text-blue-500 font-bold uppercase">Target RSI:${bot.rsiLimit}</span>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
@@ -458,29 +538,29 @@
 
                         <div class="bg-black/30 p-4 rounded-xl mb-4 border border-white/5 flex justify-between items-center text-center">
                             <div class="flex-1">
-                                <p class="indicator-mini mb-1">Live ROI</p>
+                                <p class="indicator-mini mb-1">Current ROI</p>
                                 <p class="text-lg font-black tabular-nums ${bot.pnl >= 0 ? 'profit' : 'loss'}">
                                     ${bot.state === 'HOLDING' ? displayPnl + '%' : '0.00%'}
                                 </p>
                             </div>
                             <div class="w-px h-6 bg-slate-800 mx-2"></div>
                             <div class="flex-1">
-                                <p class="indicator-mini mb-1">累计利润</p>
+                                <p class="indicator-mini mb-1">Total Net</p>
                                 <p class="text-lg font-black text-slate-100">${(bot.totalProfit || 0).toFixed(2)}<span class="text-[9px] opacity-40 ml-0.5">U</span></p>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-3 gap-2 bg-[#161a1e] p-2.5 rounded-xl text-[9px] font-bold">
                             <div class="text-center">
-                                <span class="text-slate-500 block uppercase mb-1">15m RSI</span>
+                                <span class="text-slate-500 block uppercase mb-1">RSI (15m)</span>
                                 <span class="${feed.rsi15 >= bot.rsiLimit ? 'text-red-500 animate-pulse' : 'text-slate-200'}">${feed.rsi15.toFixed(1)}</span>
                             </div>
                             <div class="text-center border-x border-white/5">
-                                <span class="text-slate-500 block uppercase mb-1">1h 涨幅</span>
+                                <span class="text-slate-500 block uppercase mb-1">Pump (1h)</span>
                                 <span class="${feed.pump >= bot.pumpLimit ? 'text-red-500' : 'text-slate-200'}">${feed.pump.toFixed(1)}%</span>
                             </div>
                             <div class="text-center">
-                                <span class="text-slate-500 block uppercase mb-1">量能倍数</span>
+                                <span class="text-slate-500 block uppercase mb-1">Volume X</span>
                                 <span class="${feed.volRatio >= bot.volLimit ? 'text-red-500' : 'text-slate-200'}">${feed.volRatio.toFixed(1)}x</span>
                             </div>
                         </div>
@@ -502,8 +582,7 @@
             const key = localStorage.getItem('s_api_k');
             const secret = localStorage.getItem('s_api_s');
             const base = (localStorage.getItem('s_api_b') || DEFAULT_API_BASE).replace(/\/$/, "");
-            
-            if(!key || !secret) throw new Error("API Keys missing");
+            if(!key || !secret) return { msg: "API Keys missing" };
             
             const timestamp = Date.now();
             let query = Object.keys(params).map(k => `${k}=${params[k]}`).join('&');
