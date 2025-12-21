@@ -2,286 +2,246 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>RSI 极端做空 - 移动专业版</title>
-    
-    <!-- PWA 移动端 App 配置 -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="SentinelBot">
-    <meta name="theme-color" content="#0b0e11">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>量化参数压力测试实验室 - 多指标增强版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
-        body { 
-            background-color: #0b0e11; 
-            color: #eaecef; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            -webkit-tap-highlight-color: transparent;
-            overscroll-behavior-y: contain; /* 禁用下拉刷新 */
-        }
-        .safe-area-top { padding-top: env(safe-area-inset-top); }
-        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
-        .app-card { background-color: #1e2329; border-radius: 24px; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.2s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .nav-item.active { color: #f0b90b; }
-        .rsi-circle { width: 110px; height: 110px; border-radius: 50%; border: 4px solid #2b3139; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, #1e2329 0%, #161a1e 100%); }
-        .input-mobile { background-color: #161a1e; border: 1px solid #2b3139; border-radius: 12px; padding: 12px; width: 100%; color: white; font-size: 16px; transition: border-color 0.2s; }
-        .input-mobile:focus { border-color: #f0b90b; outline: none; }
-        
-        .status-bar { background: rgba(11, 14, 17, 0.85); backdrop-filter: blur(15px); }
-        @keyframes pulse-red { 0%, 100% { color: #f6465d; } 50% { color: #ff8d9b; } }
-        .animate-alert { animation: pulse-red 0.8s infinite; }
-        
-        ::-webkit-scrollbar { display: none; }
+        body { background-color: #0b0e11; color: #eaecef; font-family: -apple-system, system-ui, sans-serif; }
+        .glass { background: rgba(30, 35, 41, 0.7); backdrop-filter: blur(10px); border: 1px solid #2b3139; }
+        .bot-card { background: #1e2329; border: 1px solid #2b3139; border-radius: 24px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
+        .bot-card:hover { border-color: #f0b90b; transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.5); }
+        .input-dark { background: #161a1e; border: 1px solid #2b3139; border-radius: 12px; padding: 12px; color: white; font-size: 14px; width: 100%; }
+        .input-dark:focus { border-color: #f0b90b; outline: none; box-shadow: 0 0 0 2px rgba(240, 185, 11, 0.2); }
+        .profit { color: #0ecb81; }
+        .loss { color: #f6465d; }
+        .param-tag { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #474d57; border-radius: 10px; }
+        .indicator-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.6; }
     </style>
 </head>
-<body class="bg-[#0b0e11] select-none">
+<body class="p-4 md:p-8">
 
-    <!-- 顶部状态栏 -->
-    <div class="status-bar sticky top-0 z-50 px-6 pb-3 pt-[calc(env(safe-area-inset-top)+12px)] border-b border-[#2b3139] flex justify-between items-center">
-        <div class="flex items-center">
-            <div id="dot" class="w-2.5 h-2.5 rounded-full bg-slate-500 mr-2"></div>
-            <span id="statusTxt" class="text-[10px] font-black uppercase tracking-widest text-slate-400">Offline</span>
+    <div class="max-w-7xl mx-auto">
+        <!-- 导航头部 -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
+            <div>
+                <h1 class="text-3xl font-black text-[#f0b90b] tracking-tighter italic flex items-center">
+                    <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    STRATEGY MULTI-DIM LAB
+                </h1>
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-[0.3em] mt-2">多指标共振策略测试沙盒 (RSI + 涨幅 + 成交量)</p>
+            </div>
+            <button onclick="openModal()" class="bg-[#f0b90b] text-[#0b0e11] px-10 py-4 rounded-2xl font-black text-sm shadow-xl hover:brightness-110 active:scale-95 transition-all uppercase tracking-widest">
+                创建多维测试方案
+            </button>
+        </header>
+
+        <!-- 全局数据 -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <div class="glass p-6 rounded-3xl border-l-4 border-blue-500">
+                <p class="indicator-label">活跃方案数</p>
+                <p id="totalBots" class="text-4xl font-black mt-1">0</p>
+            </div>
+            <div class="glass p-6 rounded-3xl border-l-4 border-emerald-500">
+                <p class="indicator-label">累计模拟净利</p>
+                <p id="totalProfit" class="text-4xl font-black profit mt-1">0.00 <span class="text-sm font-normal">U</span></p>
+            </div>
+            <div class="glass p-6 rounded-3xl border-l-4 border-orange-500">
+                <p class="indicator-label">当前最优策略</p>
+                <p id="bestBot" class="text-lg font-bold text-slate-200 mt-2 truncate">---</p>
+            </div>
+            <div class="glass p-6 rounded-3xl border-l-4 border-indigo-500">
+                <p class="indicator-label">实时 API 馈送</p>
+                <div class="flex items-center mt-2">
+                    <span id="apiDot" class="w-2.5 h-2.5 rounded-full bg-slate-500 mr-2"></span>
+                    <span id="apiText" class="text-xs font-black uppercase text-slate-400">Ready</span>
+                </div>
+            </div>
         </div>
-        <div class="text-[#f0b90b] font-black text-xs tracking-tighter italic">SENTINEL SYSTEM</div>
+
+        <!-- 方案矩阵 -->
+        <div id="botGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- 动态卡片 -->
+        </div>
     </div>
 
-    <main class="px-4 pt-4 pb-32">
-        
-        <!-- Tab 1: 监控看板 -->
-        <section id="tab-dashboard" class="tab-content active space-y-4">
-            <div class="app-card p-6 shadow-2xl relative overflow-hidden border border-white/5">
-                <div class="flex justify-between items-start relative z-10">
-                    <div>
-                        <h2 id="displaySymbol" class="text-4xl font-black tracking-tighter italic">VTHOUSDT</h2>
-                        <div class="flex items-center gap-1.5 mt-1">
-                            <span class="px-1.5 py-0.5 bg-red-500/20 text-red-500 text-[9px] font-black rounded uppercase">Short Strategy</span>
-                            <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Perpetual</p>
-                        </div>
+    <!-- 配置弹窗 -->
+    <div id="modal" class="fixed inset-0 bg-black/95 backdrop-blur-xl hidden flex items-center justify-center z-50 p-6">
+        <div class="bg-[#1e2329] w-full max-w-2xl p-8 md:p-10 rounded-[2.5rem] border border-[#2b3139] shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-black text-[#f0b90b] italic uppercase tracking-tighter">部署多指标测试项</h2>
+                <button onclick="closeModal()" class="text-slate-500 hover:text-white text-2xl font-bold">&times;</button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 基础设置 -->
+                <div class="md:col-span-2">
+                    <label class="indicator-label block mb-2">测试方案名称</label>
+                    <input type="text" id="botName" class="input-dark font-bold" placeholder="例如：RSI+量能暴力做空">
+                </div>
+                <div>
+                    <label class="indicator-label block mb-2">交易对 (BTCUSDT)</label>
+                    <input type="text" id="botSymbol" class="input-dark uppercase font-black" value="VTHOUSDT">
+                </div>
+                <div>
+                    <label class="indicator-label block mb-2">杠杆倍数 (X)</label>
+                    <input type="number" id="botLev" class="input-dark font-black" value="10">
+                </div>
+
+                <!-- 指标阈值 (共振条件) -->
+                <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="p-4 bg-blue-500/5 rounded-2xl border border-blue-500/10">
+                        <label class="indicator-label block mb-1 text-blue-400">RSI 做空线</label>
+                        <input type="number" id="botRsi" class="bg-transparent text-2xl font-black text-white outline-none w-full" value="95">
                     </div>
-                    <div class="text-right">
-                        <p id="displayPrice" class="text-3xl font-mono text-[#f0b90b] font-black tracking-tighter">---</p>
-                        <p class="text-[9px] text-slate-600 font-bold uppercase mt-1 tracking-widest">Mark Price</p>
+                    <div class="p-4 bg-purple-500/5 rounded-2xl border border-purple-500/10">
+                        <label class="indicator-label block mb-1 text-purple-400">短线涨幅线 (%)</label>
+                        <input type="number" id="botPump" class="bg-transparent text-2xl font-black text-white outline-none w-full" value="5">
+                        <p class="text-[8px] text-slate-500 mt-1">1h 内涨幅需超过此值</p>
+                    </div>
+                    <div class="p-4 bg-yellow-500/5 rounded-2xl border border-yellow-500/10">
+                        <label class="indicator-label block mb-1 text-yellow-400">成交量激增 (倍)</label>
+                        <input type="number" id="botVol" class="bg-transparent text-2xl font-black text-white outline-none w-full" value="2">
+                        <p class="text-[8px] text-slate-500 mt-1">当前成交量 vs 20均量</p>
                     </div>
                 </div>
-                
-                <div class="flex justify-around mt-10 mb-2">
-                    <div class="text-center group">
-                        <div class="rsi-circle mb-3 mx-auto shadow-inner border-[#2b3139] group-active:scale-95 transition-transform">
-                            <span id="rsi15v" class="text-3xl font-black text-slate-200">--</span>
-                        </div>
-                        <span class="text-[10px] text-slate-500 font-black uppercase tracking-widest">15m RSI</span>
-                    </div>
-                    <div class="text-center group">
-                        <div class="rsi-circle mb-3 mx-auto shadow-inner border-[#2b3139] group-active:scale-95 transition-transform">
-                            <span id="rsi1hv" class="text-3xl font-black text-slate-200">--</span>
-                        </div>
-                        <span class="text-[10px] text-slate-500 font-black uppercase tracking-widest">1h RSI</span>
-                    </div>
+
+                <!-- 止盈止损 -->
+                <div class="p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10">
+                    <label class="indicator-label block mb-1 text-emerald-400">止盈 ROI (%)</label>
+                    <input type="number" id="botTp" class="bg-transparent text-2xl font-black text-white outline-none w-full" value="30">
+                </div>
+                <div class="p-4 bg-red-500/5 rounded-2xl border border-red-500/10">
+                    <label class="indicator-label block mb-1 text-red-400">补仓触发 ROI (%)</label>
+                    <input type="number" id="botAdd" class="bg-transparent text-2xl font-black text-white outline-none w-full" value="-20">
                 </div>
             </div>
 
-            <div id="positionCard" class="app-card p-6 border-l-4 border-slate-700 shadow-lg">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest">Trading State</p>
-                        <p id="posStatusText" class="text-xl font-black mt-1 text-slate-400 uppercase">Scanning</p>
-                    </div>
-                    <div class="text-right">
-                        <p id="displayROI" class="text-3xl font-black tabular-nums">-- %</p>
-                        <p class="text-[10px] text-slate-500 font-black uppercase tracking-widest">ROI Ratio</p>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-y-5 gap-x-4 mt-8 pt-6 border-t border-white/5">
-                    <div>
-                        <p class="text-[9px] text-slate-500 font-bold uppercase">入场均价</p>
-                        <p id="statEntry" class="font-bold text-slate-200 text-sm">--</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[9px] text-slate-500 font-bold uppercase">累计补仓</p>
-                        <p id="statAdd" class="font-bold text-slate-200 text-sm">0 次</p>
-                    </div>
-                    <div>
-                        <p class="text-[9px] text-slate-500 font-bold uppercase">账户余额 (USDT)</p>
-                        <p id="statBalance" class="font-bold text-slate-200 text-sm">--</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[9px] text-slate-500 font-bold uppercase">未实现盈亏(U)</p>
-                        <p id="statPnl" class="font-bold text-slate-200 text-sm">--</p>
-                    </div>
-                </div>
+            <div class="flex gap-4 mt-10">
+                <button onclick="closeModal()" class="flex-1 py-4 text-slate-500 font-bold uppercase text-xs">取消</button>
+                <button onclick="saveBot()" class="flex-1 py-4 bg-[#f0b90b] text-[#0b0e11] rounded-2xl font-black uppercase text-sm shadow-xl active:scale-95 transition-all">开启多维测试</button>
             </div>
-        </section>
-
-        <!-- Tab 2: 策略设置 -->
-        <section id="tab-strategy" class="tab-content space-y-6">
-            <div class="app-card p-6 shadow-xl">
-                <h3 class="text-sm font-black mb-6 flex items-center text-[#f0b90b] uppercase tracking-widest">
-                    <span class="w-1 h-4 bg-[#f0b90b] mr-2 rounded-full"></span>
-                    Strategy Parameters
-                </h3>
-                <div class="space-y-6">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-[10px] text-slate-500 block mb-2 font-black uppercase">监测币种</label>
-                            <input type="text" id="symbol" class="input-mobile uppercase font-black" value="VTHOUSDT">
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-slate-500 block mb-2 font-black uppercase">杠杆倍数</label>
-                            <input type="number" id="leverage" class="input-mobile font-bold" value="10">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-slate-500 block mb-2 font-black uppercase">RSI 做空触发线 (双周期)</label>
-                        <input type="number" id="buyThreshold" class="input-mobile text-blue-400 font-black text-xl" value="97">
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-[10px] text-slate-500 block mb-2 font-black uppercase">止盈 ROI (%)</label>
-                            <input type="number" id="targetROI" class="input-mobile text-emerald-400 font-black" value="30">
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-slate-500 block mb-2 font-black uppercase">加仓 ROI (%)</label>
-                            <input type="number" id="addThresholdROI" class="input-mobile text-red-400 font-black" value="-20">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-[10px] text-slate-500 block mb-2 font-black uppercase">首次开仓 (U)</label>
-                            <input type="number" id="initU" class="input-mobile" value="1">
-                        </div>
-                        <div>
-                            <label class="text-[10px] text-slate-500 block mb-2 font-black uppercase">加仓金额 (U)</label>
-                            <input type="number" id="addU" class="input-mobile" value="2">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Tab 3: API & 系统 -->
-        <section id="tab-settings" class="tab-content space-y-6">
-            <div class="app-card p-6 shadow-xl">
-                <h3 class="text-sm font-black mb-6 flex items-center text-blue-400 uppercase tracking-widest">
-                    <span class="w-1 h-4 bg-blue-400 mr-2 rounded-full"></span>
-                    Account Secure Access
-                </h3>
-                <div class="space-y-4">
-                    <div class="space-y-1">
-                        <label class="text-[9px] text-slate-500 uppercase font-bold px-1">API Key</label>
-                        <input type="password" id="apiKey" class="input-mobile text-sm" placeholder="Paste Key">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[9px] text-slate-500 uppercase font-bold px-1">Secret Key</label>
-                        <input type="password" id="apiSecret" class="input-mobile text-sm" placeholder="Paste Secret">
-                    </div>
-                    <div class="p-4 bg-blue-500/5 rounded-xl border border-blue-500/10 text-[10px] text-slate-500 leading-relaxed italic">
-                        * 密钥保存在本地浏览器缓存中。请确保已开启浏览器跨域(CORS)插件。
-                    </div>
-                    <button onclick="localStorage.clear(); location.reload();" class="w-full py-4 text-[10px] text-red-500/60 font-black uppercase tracking-widest border border-red-500/10 rounded-xl mt-4">Reset Application Data</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Tab 4: 运行日志 -->
-        <section id="tab-logs" class="tab-content">
-            <div class="app-card p-4 h-[65vh] flex flex-col shadow-inner">
-                <div class="flex justify-between items-center mb-4 px-2">
-                    <h3 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Live Engine Logs</h3>
-                    <button onclick="document.getElementById('logs').innerHTML=''" class="text-[9px] text-slate-600 font-bold uppercase">Clear</button>
-                </div>
-                <div id="logs" class="log-panel flex-1 overflow-y-auto p-3 rounded-2xl bg-black/20 text-[11px] font-mono leading-relaxed">
-                    <div class="text-slate-700 italic">> 等待指令开启监控...</div>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- 底部导航栏 -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-[#1e2329]/95 backdrop-blur-xl border-t border-white/5 px-6 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] flex justify-between items-center z-50 shadow-2xl">
-        <button onclick="showTab('dashboard')" class="nav-item active flex flex-col items-center gap-1 transition-all active:scale-90">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-            <span class="text-[9px] font-black uppercase">Dashboard</span>
-        </button>
-        <button onclick="showTab('strategy')" class="nav-item flex flex-col items-center gap-1 text-slate-500 transition-all active:scale-90">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-            <span class="text-[9px] font-black uppercase">Strategy</span>
-        </button>
-        
-        <!-- 启动按钮 -->
-        <div class="relative -mt-12">
-            <button id="runBtn" class="bg-[#f0b90b] text-[#0b0e11] w-16 h-16 rounded-full flex items-center justify-center shadow-[0_8px_20px_rgba(240,185,11,0.3)] border-[6px] border-[#0b0e11] active:scale-90 transition-transform">
-                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
-            </button>
-            <button id="stopBtn" class="hidden bg-red-500 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-[0_8px_20px_rgba(239,68,68,0.3)] border-[6px] border-[#0b0e11] active:scale-90 transition-transform">
-                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd"></path></svg>
-            </button>
         </div>
-
-        <button onclick="showTab('settings')" class="nav-item flex flex-col items-center gap-1 text-slate-500 transition-all active:scale-90">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-            <span class="text-[9px] font-black uppercase">Account</span>
-        </button>
-        <button onclick="showTab('logs')" class="nav-item flex flex-col items-center gap-1 text-slate-500 transition-all active:scale-90">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-            <span class="text-[9px] font-black uppercase">Logs</span>
-        </button>
-    </nav>
-
-    <audio id="alert" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    </div>
 
     <script>
-        let isRunning = false;
-        let timer = null;
-        let isHolding = false;
-        let addLock = false; 
-        const fapi = "https://fapi.binance.com";
-
-        function showTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(btn => {
-                btn.classList.add('text-slate-500');
-                btn.classList.remove('text-[#f0b90b]');
-            });
-            document.getElementById(`tab-${tabId}`).classList.add('active');
-            event.currentTarget.classList.add('text-[#f0b90b]');
-            event.currentTarget.classList.remove('text-slate-500');
-            if(window.navigator.vibrate) window.navigator.vibrate(10);
-        }
+        let bots = [];
+        let marketData = {}; 
+        const fapi = "https://fapi.binance.com"; 
 
         window.onload = () => {
-            const k = localStorage.getItem('_local_k');
-            const s = localStorage.getItem('_local_s');
-            if(k) document.getElementById('apiKey').value = k;
-            if(s) document.getElementById('apiSecret').value = s;
+            const saved = localStorage.getItem('lab_multi_v4');
+            if(saved) {
+                bots = JSON.parse(saved);
+                renderBots();
+            }
+            startEngine();
         };
 
-        function hmac256(msg, secret) {
-            return CryptoJS.HmacSHA256(msg, secret).toString(CryptoJS.enc.Hex);
+        function openModal() { document.getElementById('modal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+        function saveBot() {
+            const newBot = {
+                id: Date.now(),
+                name: document.getElementById('botName').value || "多指标方案",
+                symbol: document.getElementById('botSymbol').value.toUpperCase().replace('/', ''),
+                rsiLimit: parseFloat(document.getElementById('botRsi').value),
+                pumpLimit: parseFloat(document.getElementById('botPump').value),
+                volLimit: parseFloat(document.getElementById('botVol').value),
+                lev: parseFloat(document.getElementById('botLev').value),
+                tp: parseFloat(document.getElementById('botTp').value),
+                addLimit: parseFloat(document.getElementById('botAdd').value),
+                state: 'SCANNING', 
+                pnl: 0,
+                trades: 0,
+                entryPrice: 0,
+                totalProfit: 0,
+                currentAmt: 0,
+                hasAdded: false
+            };
+            bots.push(newBot);
+            localStorage.setItem('lab_multi_v4', JSON.stringify(bots));
+            renderBots();
+            closeModal();
         }
 
-        async function signedRequest(method, endpoint, params = {}) {
-            const key = document.getElementById('apiKey').value;
-            const secret = document.getElementById('apiSecret').value;
-            if(!key || !secret) return { msg: "Keys Required" };
-            const timestamp = Date.now();
-            let query = Object.keys(params).map(k => `${k}=${params[k]}`).join('&');
-            query += (query ? '&' : '') + `timestamp=${timestamp}&recvWindow=10000`;
-            const signature = hmac256(query, secret);
-            const res = await fetch(`${fapi}${endpoint}?${query}&signature=${signature}`, {
-                method, headers: { 'X-MBX-APIKEY': key }
+        function renderBots() {
+            const grid = document.getElementById('botGrid');
+            grid.innerHTML = '';
+            document.getElementById('totalBots').innerText = bots.length;
+
+            if(bots.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-20 text-center opacity-20 border-2 border-dashed border-slate-800 rounded-[3rem]"><p class="font-black text-slate-500 uppercase tracking-widest">请创建多指标测试方案开始对比</p></div>`;
+                return;
+            }
+
+            bots.forEach(bot => {
+                const data = marketData[bot.symbol] || { price: 0, rsi15: 0, rsi1h: 0, pump: 0, volRatio: 0 };
+                const card = document.createElement('div');
+                card.className = `bot-card p-7 shadow-2xl ${bot.state === 'HOLDING' ? 'ring-2 ring-blue-500/40 border-blue-500/20' : 'border-[#2b3139]'}`;
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h3 class="font-black text-lg tracking-tighter truncate w-32 uppercase italic text-slate-200">${bot.name}</h3>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="px-2 py-0.5 bg-yellow-900/30 text-[#f0b90b] text-[10px] font-black rounded uppercase">${bot.symbol}</span>
+                                <span class="px-2 py-0.5 bg-slate-800 text-slate-400 text-[10px] font-black rounded uppercase">${bot.lev}X</span>
+                            </div>
+                        </div>
+                        <button onclick="deleteBot(${bot.id})" class="text-slate-700 hover:text-red-500 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- 动态指标监控 -->
+                    <div class="grid grid-cols-3 gap-2 mb-6">
+                        <div class="param-tag p-2 rounded-xl text-center">
+                            <p class="indicator-label">RSI 15m</p>
+                            <p class="text-sm font-black ${data.rsi15 >= bot.rsiLimit ? 'text-red-400' : 'text-slate-300'}">${data.rsi15.toFixed(1)}</p>
+                        </div>
+                        <div class="param-tag p-2 rounded-xl text-center">
+                            <p class="indicator-label">1h 涨幅</p>
+                            <p class="text-sm font-black ${data.pump >= bot.pumpLimit ? 'text-red-400' : 'text-slate-300'}">${data.pump.toFixed(1)}%</p>
+                        </div>
+                        <div class="param-tag p-2 rounded-xl text-center">
+                            <p class="indicator-label">量激增</p>
+                            <p class="text-sm font-black ${data.volRatio >= bot.volLimit ? 'text-red-400' : 'text-slate-300'}">${data.volRatio.toFixed(1)}x</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-black/30 p-5 rounded-2xl mb-6 flex justify-between items-center border border-white/5">
+                        <div class="text-center flex-1">
+                            <p class="indicator-label mb-1">ROI</p>
+                            <p class="text-2xl font-black tabular-nums ${bot.pnl >= 0 ? 'profit' : 'loss'}">${bot.pnl.toFixed(2)}%</p>
+                        </div>
+                        <div class="w-px h-8 bg-slate-800 mx-2"></div>
+                        <div class="text-center flex-1">
+                            <p class="indicator-label mb-1">Net Profit</p>
+                            <p class="text-2xl font-black text-slate-100">${bot.totalProfit.toFixed(2)}<span class="text-[10px] ml-1 opacity-40">U</span></p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest px-1">
+                        <span class="text-slate-600">STATE: <span class="${bot.state === 'HOLDING' ? 'text-red-400' : 'text-blue-400'}">${bot.state}</span></span>
+                        <span class="text-slate-600">成交: <span class="text-slate-300">${bot.trades}</span></span>
+                    </div>
+                `;
+                grid.appendChild(card);
             });
-            return await res.json();
+        }
+
+        function deleteBot(id) {
+            bots = bots.filter(b => b.id !== id);
+            localStorage.setItem('lab_multi_v4', JSON.stringify(bots));
+            renderBots();
         }
 
         function calculateRSI(closes, period = 14) {
+            if (closes.length < period) return 0;
             let changes = [];
             for (let i = 1; i < closes.length; i++) changes.push(closes[i] - closes[i - 1]);
             let g = 0, l = 0;
@@ -294,134 +254,97 @@
             return 100 - (100 / (1 + (ag / (al || 1e-9))));
         }
 
-        async function executeTrade(symbol, side, qty) {
-            try {
-                const lev = document.getElementById('leverage').value;
-                await signedRequest('POST', '/fapi/v1/leverage', { symbol, leverage: lev });
-                const order = await signedRequest('POST', '/fapi/v1/order', { symbol, side, type: 'MARKET', quantity: qty });
-                if(order.orderId) {
-                    addLog(`🔥 [Trade] ${side} 执行成功`, 'text-emerald-400 font-black');
-                    return true;
+        async function startEngine() {
+            setInterval(async () => {
+                if (bots.length === 0) return;
+                const uniqueSymbols = [...new Set(bots.map(b => b.symbol))];
+                try {
+                    for (const symbol of uniqueSymbols) {
+                        // 获取 K 线数据
+                        const resp = await fetch(`${fapi}/fapi/v1/klines?symbol=${symbol}&interval=15m&limit=100`).then(r => r.json());
+                        const closes = resp.map(d => parseFloat(d[4]));
+                        const volumes = resp.map(d => parseFloat(d[5]));
+                        
+                        const price = closes[closes.length-1];
+                        
+                        // RSI
+                        const rsi15v = calculateRSI(closes);
+                        
+                        // 短线涨幅 (对比 1 小时前，即 4 根 15m K线)
+                        const oldPrice = closes[closes.length - 5] || closes[0];
+                        const pump = ((price - oldPrice) / oldPrice) * 100;
+                        
+                        // 成交量激增 (当前量 vs 过去 20 周期均量)
+                        const currentVol = volumes[volumes.length - 1];
+                        const avgVol = volumes.slice(-21, -1).reduce((a, b) => a + b, 0) / 20;
+                        const volRatio = currentVol / (avgVol || 1);
+
+                        marketData[symbol] = { price, rsi15: rsi15v, pump, volRatio };
+                    }
+                    
+                    document.getElementById('apiDot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse mr-2";
+                    document.getElementById('apiText').innerText = "Streaming Data";
+                    document.getElementById('apiText').className = "text-xs font-black uppercase text-emerald-400";
+                    
+                    updateBotsLogic();
+                } catch (e) {
+                    document.getElementById('apiDot').className = "w-2.5 h-2.5 rounded-full bg-red-500 mr-2";
+                    document.getElementById('apiText').innerText = "Connection Weak";
                 }
-                addLog(`⚠️ [Trade Error] ${order.msg}`, 'text-red-400 font-bold'); return false;
-            } catch (e) { addLog(`❌ [Network] 交易异常，检查跨域插件`, 'text-red-400'); return false; }
+            }, 5000);
         }
 
-        function addLog(msg, color = 'text-slate-500') {
-            const box = document.getElementById('logs');
-            const div = document.createElement('div');
-            div.className = `${color} border-b border-white/5 py-2`;
-            div.innerHTML = `<span class="opacity-30 mr-2 text-[9px]">${new Date().toLocaleTimeString()}</span> ${msg}`;
-            box.prepend(div);
-        }
+        function updateBotsLogic() {
+            let totalProfitSum = 0;
+            bots.forEach(bot => {
+                const data = marketData[bot.symbol];
+                if (!data) return;
+                const { price, rsi15, pump, volRatio } = data;
 
-        async function engine() {
-            const sym = document.getElementById('symbol').value.toUpperCase();
-            const threshold = parseFloat(document.getElementById('buyThreshold').value);
-            const lev = parseFloat(document.getElementById('leverage').value);
-            const tp = parseFloat(document.getElementById('targetROI').value);
-            const addLimit = parseFloat(document.getElementById('addThresholdROI').value);
-            const initU = parseFloat(document.getElementById('initU').value);
-            const addU = parseFloat(document.getElementById('addU').value);
+                if (bot.state === 'SCANNING') {
+                    bot.pnl = 0;
+                    // 多维共振触发：RSI 超标 + 1h内涨幅超标 + 成交量激增
+                    if (rsi15 >= bot.rsiLimit && pump >= bot.pumpLimit && volRatio >= bot.volLimit) {
+                        bot.state = 'HOLDING';
+                        bot.entryPrice = price;
+                        bot.trades += 1;
+                        bot.hasAdded = false;
+                        bot.currentAmt = 1; 
+                    }
+                } else if (bot.state === 'HOLDING') {
+                    bot.pnl = (bot.entryPrice - price) / bot.entryPrice * bot.lev * 100;
 
-            try {
-                const [r15, r1h] = await Promise.all([
-                    fetch(`${fapi}/fapi/v1/klines?symbol=${sym}&interval=15m&limit=500`).then(r => r.json()),
-                    fetch(`${fapi}/fapi/v1/klines?symbol=${sym}&interval=1h&limit=500`).then(r => r.json())
-                ]);
-                const c15 = r15.map(d => parseFloat(d[4])), c1h = r1h.map(d => parseFloat(d[4]));
-                const price = c15[c15.length-1], r15v = calculateRSI(c15), r1hv = calculateRSI(c1h);
+                    if (bot.pnl >= bot.tp) {
+                        bot.totalProfit += (bot.currentAmt * (bot.pnl / 100)); 
+                        bot.state = 'SCANNING';
+                    }
 
-                const [positions, balanceData] = await Promise.all([
-                    signedRequest('GET', '/fapi/v2/positionRisk', { symbol: sym }),
-                    signedRequest('GET', '/fapi/v2/balance')
-                ]);
-                const pos = Array.isArray(positions) ? positions.find(p => p.symbol === sym) : null;
-                if(!pos) return;
-                
-                const amt = parseFloat(pos.positionAmt), entry = parseFloat(pos.entryPrice);
-                isHolding = amt < 0; 
-                const usdt = balanceData.find(b => b.asset === 'USDT');
-                const roi = isHolding ? (entry - price) / entry * lev * 100 : 0;
-
-                document.getElementById('displaySymbol').innerText = sym;
-                document.getElementById('displayPrice').innerText = price > 1 ? price.toFixed(4) : price.toFixed(6);
-                
-                const r15El = document.getElementById('rsi15v');
-                const r1hEl = document.getElementById('rsi1hv');
-                r15El.innerText = r15v.toFixed(1);
-                r1hEl.innerText = r1hv.toFixed(1);
-                
-                if(r15v >= threshold - 3) r15El.className = 'text-3xl font-black text-red-500 animate-alert'; else r15El.className = 'text-3xl font-black text-slate-200';
-                if(r1hv >= threshold - 3) r1hEl.className = 'text-3xl font-black text-red-500 animate-alert'; else r1hEl.className = 'text-3xl font-black text-slate-200';
-
-                document.getElementById('statBalance').innerText = usdt ? parseFloat(usdt.balance).toFixed(2) : '--';
-                
-                if(isHolding) {
-                    document.getElementById('positionCard').className = 'app-card p-6 border-l-4 border-blue-500 shadow-xl';
-                    document.getElementById('posStatusText').innerText = "SHORTING";
-                    document.getElementById('posStatusText').className = "text-xl font-black mt-1 text-blue-400";
-                    document.getElementById('displayROI').innerText = `${roi >= 0 ? '+' : ''}${roi.toFixed(2)} %`;
-                    document.getElementById('displayROI').className = `text-3xl font-black ${roi >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
-                    document.getElementById('statEntry').innerText = entry.toFixed(6);
-                    document.getElementById('statPnl').innerText = parseFloat(pos.unrealizedProfit).toFixed(2);
-                } else {
-                    document.getElementById('positionCard').className = 'app-card p-6 border-l-4 border-slate-700';
-                    document.getElementById('posStatusText').innerText = "SCANNING";
-                    document.getElementById('posStatusText').className = "text-xl font-black mt-1 text-slate-500";
-                    document.getElementById('displayROI').innerText = "-- %";
-                    document.getElementById('displayROI').className = "text-3xl font-black text-slate-700";
-                    document.getElementById('statEntry').innerText = "--";
-                    document.getElementById('statPnl').innerText = "--";
-                }
-
-                if(r15v >= threshold && r1hv >= threshold && !isHolding) {
-                    addLog(`[ALERT] 信号触发! 开始做空`, 'text-orange-400 font-black');
-                    document.getElementById('alert').play();
-                    let qty = Math.floor((initU * lev) / price);
-                    if(await executeTrade(sym, 'SELL', qty)) { isHolding = true; addLock = false; }
-                }
-
-                if(isHolding && roi >= tp) {
-                    addLog(`[TARGET] 收益达标，止盈平仓`, 'text-emerald-400 font-black');
-                    if(await executeTrade(sym, 'BUY', Math.abs(amt))) isHolding = false;
-                }
-
-                if(isHolding && roi <= addLimit && !addLock) {
-                    addLog(`[ADD] 触发补仓线，追加 2U 仓位`, 'text-red-400 font-black');
-                    let addQty = Math.floor((addU * lev) / price);
-                    if(await executeTrade(sym, 'SELL', addQty)) {
-                        addLock = true;
-                        document.getElementById('statAdd').innerText = parseInt(document.getElementById('statAdd').innerText) + 1;
+                    if (bot.pnl <= bot.addLimit && !bot.hasAdded) {
+                        const oldVal = bot.currentAmt * bot.lev;
+                        const newVal = 2 * bot.lev; // 默认加仓 2U
+                        const totalVal = oldVal + newVal;
+                        const oldQty = oldVal / bot.entryPrice;
+                        const newQty = newVal / price;
+                        bot.entryPrice = totalVal / (oldQty + newQty);
+                        bot.currentAmt += 2;
+                        bot.hasAdded = true;
+                    }
+                    
+                    if (bot.pnl <= -100) {
+                        bot.totalProfit -= bot.currentAmt; 
+                        bot.state = 'SCANNING';
                     }
                 }
-            } catch (e) { console.error(e); }
+                totalProfitSum += bot.totalProfit;
+            });
+
+            if (bots.length > 0) {
+                const best = bots.reduce((prev, current) => (prev.totalProfit > current.totalProfit) ? prev : current);
+                document.getElementById('bestBot').innerText = best.name.toUpperCase();
+                document.getElementById('totalProfit').innerText = totalProfitSum.toFixed(2);
+            }
+            renderBots();
         }
-
-        document.getElementById('runBtn').onclick = () => {
-            const k = document.getElementById('apiKey').value;
-            const s = document.getElementById('apiSecret').value;
-            if(!k || !s) { showTab('settings'); return alert("请先填写 API Keys"); }
-            localStorage.setItem('_local_k', k); localStorage.setItem('_local_s', s);
-            isRunning = true;
-            document.getElementById('runBtn').classList.add('hidden');
-            document.getElementById('stopBtn').classList.remove('hidden');
-            document.getElementById('dot').className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse';
-            document.getElementById('statusTxt').innerText = 'Running';
-            document.getElementById('statusTxt').className = 'text-[10px] font-black uppercase tracking-widest text-emerald-400';
-            addLog("哨兵引擎已启动", "text-blue-400 font-black");
-            engine(); timer = setInterval(engine, 10000);
-        };
-
-        document.getElementById('stopBtn').onclick = () => {
-            isRunning = false; clearInterval(timer);
-            document.getElementById('runBtn').classList.remove('hidden');
-            document.getElementById('stopBtn').classList.add('hidden');
-            document.getElementById('dot').className = 'w-2.5 h-2.5 rounded-full bg-slate-500';
-            document.getElementById('statusTxt').innerText = 'Offline';
-            document.getElementById('statusTxt').className = 'text-[10px] font-black uppercase tracking-widest text-slate-400';
-            addLog("系统已手动停机");
-        };
     </script>
 </body>
 </html>
