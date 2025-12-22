@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>哨兵量化 - 15m抓针稳健专业版</title>
+    <title>哨兵量化 - 15m抓针稳健专业版 V32</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -29,7 +29,7 @@
             const app = initializeApp(firebaseConfig);
             const auth = getAuth(app);
             const db = getFirestore(app);
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'sentinel-v30-hard-stop';
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'sentinel-v32-pro';
 
             window.db = db;
             window.auth = auth;
@@ -80,18 +80,18 @@
 </head>
 <body>
 
-    <!-- 顶部状态 (优化手机端布局) -->
-    <div id="topHeader" class="sticky top-0 z-50 bg-[#0b0e11]/95 backdrop-blur-md border-b border-[#2b3139] px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
-        <div class="flex-shrink min-w-0 pr-2">
+    <!-- 顶部状态 (手机端优化布局) -->
+    <div id="topHeader" class="sticky top-0 z-50 bg-[#0b0e11]/95 backdrop-blur-md border-b border-[#2b3139] px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center text-white">
+        <div class="flex-shrink min-w-0 pr-2 text-left">
             <h1 class="text-lg sm:text-xl font-black text-[#f0b90b] italic tracking-tighter uppercase truncate">Sentinel Pro</h1>
             <div class="flex items-center gap-1 sm:gap-2">
                 <span id="apiStatusDot" class="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-slate-600 flex-shrink-0"></span>
-                <p id="globalStatus" class="text-[7px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate">Precision Engine Ready</p>
+                <p id="globalStatus" class="text-[7px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate">Precision Engine Active</p>
             </div>
         </div>
         <div class="flex gap-1.5 sm:gap-2 flex-shrink-0">
-            <button onclick="confirmAction('ALL_TP')" class="bg-[#0ecb81] text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full font-black text-[9px] sm:text-[10px] shadow-lg active:scale-95 transition-transform whitespace-nowrap">一键全平</button>
-            <button onclick="openAddModal()" class="bg-[#f0b90b] text-[#0b0e11] px-3 sm:px-4 py-1.5 sm:py-2 rounded-full font-black text-[9px] sm:text-[10px] shadow-lg active:scale-95 transition-transform whitespace-nowrap">+ 部署</button>
+            <button onclick="confirmAction('ALL_TP')" class="bg-[#0ecb81] text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full font-black text-[9px] sm:text-[10px] shadow-lg active:scale-95 whitespace-nowrap">一键全平</button>
+            <button onclick="openAddModal()" class="bg-[#f0b90b] text-[#0b0e11] px-3 sm:px-4 py-1.5 sm:py-2 rounded-full font-black text-[9px] sm:text-[10px] shadow-lg active:scale-95 whitespace-nowrap">+ 部署</button>
         </div>
     </div>
 
@@ -115,7 +115,7 @@
         <section id="tab-market" class="tab-content space-y-4">
             <div class="app-card p-6">
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-black text-[#f0b90b] italic uppercase">24H 实时行情</h3>
+                    <h3 class="text-lg font-black text-[#f0b90b] italic uppercase text-sm sm:text-lg">24H 实时行情</h3>
                     <div class="flex gap-2">
                         <button id="btn-spot" onclick="switchMarketType('spot')" class="sub-tab-btn active px-3 py-1.5 rounded-lg text-[10px] bg-slate-800 text-white font-black">现货</button>
                         <button id="btn-futures" onclick="switchMarketType('futures')" class="sub-tab-btn px-3 py-1.5 rounded-lg text-[10px] bg-slate-800 text-slate-500 font-black">合约</button>
@@ -125,7 +125,7 @@
                     <input type="text" id="marketSearch" oninput="filterMarketList()" class="input-dark pl-10 text-xs py-3" placeholder="搜索币种 (如: SOL, BTC, PEPE)...">
                     <svg class="w-4 h-4 text-slate-500 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
-                <div id="gainersList" class="divide-y divide-white/5 max-h-[55vh] overflow-y-auto pr-1"></div>
+                <div id="gainersList" class="divide-y divide-white/5 max-h-[55vh] overflow-y-auto pr-1 text-white"></div>
             </div>
         </section>
 
@@ -140,7 +140,7 @@
 
         <!-- 设置 -->
         <section id="tab-account" class="tab-content">
-            <div class="app-card p-8">
+            <div class="app-card p-8 text-white">
                 <h3 class="text-center font-black text-[#f0b90b] mb-8 tracking-widest uppercase text-sm italic">账户设置</h3>
                 <input type="password" id="apiKey" class="input-dark mb-4" placeholder="Binance API Key">
                 <input type="password" id="apiSecret" class="input-dark mb-4" placeholder="Binance Secret Key">
@@ -153,24 +153,24 @@
     <nav class="fixed bottom-0 left-0 right-0 bg-[#1e2329]/95 backdrop-blur-lg border-t border-white/5 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+15px)] flex justify-around items-center z-50">
         <button onclick="showTab('lab')" id="nav-lab" class="nav-item active flex flex-col items-center gap-1 flex-1 text-slate-500">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-            <span class="text-[9px] font-black uppercase">终端</span>
+            <span class="text-[9px] font-black uppercase text-center">终端</span>
         </button>
         <button onclick="showTab('market')" id="nav-market" class="nav-item flex flex-col items-center gap-1 flex-1 text-slate-500">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-            <span class="text-[9px] font-black uppercase">行情</span>
+            <span class="text-[9px] font-black uppercase text-center">行情</span>
         </button>
         <button onclick="showTab('alerts')" id="nav-alerts" class="nav-item flex flex-col items-center gap-1 flex-1 text-slate-500">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-            <span class="text-[9px] font-black uppercase">日志</span>
+            <span class="text-[9px] font-black uppercase text-center">日志</span>
         </button>
         <button onclick="showTab('account')" id="nav-account" class="nav-item flex flex-col items-center gap-1 flex-1 text-slate-500">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-            <span class="text-[9px] font-black uppercase">参数</span>
+            <span class="text-[9px] font-black uppercase text-center">参数</span>
         </button>
     </nav>
 
     <!-- 配置弹窗 -->
-    <div id="modal" class="fixed inset-0 bg-black/95 backdrop-blur-2xl hidden flex items-center justify-center z-[100] p-6 overflow-y-auto">
+    <div id="modal" class="fixed inset-0 bg-black/95 backdrop-blur-2xl hidden flex items-center justify-center z-[100] p-6 overflow-y-auto text-white text-left">
         <div class="bg-[#1e2329] w-full max-w-lg p-8 my-10 rounded-[2.5rem] border border-[#2b3139] shadow-2xl">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-black text-[#f0b90b] italic uppercase">抓针方案部署</h2>
@@ -183,48 +183,60 @@
                         <input type="text" id="botSymbol" class="input-dark mt-1 uppercase font-bold text-white" value="SOLUSDT">
                     </div>
                     <div>
-                        <label class="text-[10px] text-slate-500 font-black ml-1 uppercase">杠杆</label>
+                        <label class="text-[10px] text-slate-500 font-black ml-1 uppercase">杠杆倍数</label>
                         <input type="number" id="botLev" class="input-dark mt-1" value="20">
                     </div>
                 </div>
+
+                <!-- 手动开仓价 -->
+                <div>
+                    <label class="text-[10px] text-red-500 font-black ml-1 uppercase">手动开仓价 (可选)</label>
+                    <input type="number" id="botManualPrice" class="input-dark mt-1 font-mono text-[#f0b90b]" placeholder="留空则使用自动偏移捕获">
+                </div>
+
+                <!-- 单次投入金额 (新增) -->
+                <div>
+                    <label class="text-[10px] text-blue-400 font-black ml-1 uppercase">单次开仓/补仓金额 (USDT)</label>
+                    <input type="number" id="botAddVal" class="input-dark mt-1 font-bold text-white" value="5">
+                    <span class="text-[8px] text-slate-500 block mt-1">※ 默认 5U。若加仓，每次也将以此金额投入。</span>
+                </div>
+
                 <div class="p-4 bg-red-500/5 rounded-2xl border border-red-500/10 text-xs">
-                    <p class="text-red-500 font-bold mb-2 uppercase tracking-widest">入场判定 (15m RSI 对齐版)</p>
+                    <p class="text-red-500 font-bold mb-2 uppercase tracking-widest">入场判定 (自动逻辑)</p>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <span>RSI (15m) ></span>
                             <input type="number" id="botRsiLimit" class="bg-transparent border-b border-red-900 w-full text-white py-1 outline-none" value="97">
                         </div>
                         <div>
-                            <span>针尖偏移 %</span>
+                            <span>偏移 %</span>
                             <input type="number" id="botOffset" class="bg-transparent border-b border-red-900 w-full text-white py-1 outline-none" value="1.13">
                         </div>
                     </div>
                 </div>
-                <div class="p-4 bg-blue-500/5 rounded-2xl border border-blue-500/10 text-[10px] text-slate-400 space-y-1">
+                <div class="p-4 bg-blue-500/5 rounded-2xl border border-blue-500/10 text-[10px] text-slate-400 space-y-1 text-left">
                     <p>● 盈利达 <span class="text-white">40%</span> 开启 <span class="text-emerald-500 font-bold">保本模式</span></p>
                     <p>● 获利达 <span class="text-white">50%</span> 自动减仓一半 | 1小时未达50%全平</p>
                     <p>● <span class="text-white font-bold">6小时强制结清</span></p>
                     <p>● <span class="text-red-400 font-bold">3次补仓完再亏50%强制结清</span></p>
-                    <p class="pt-2 text-blue-400 font-bold">● 亏损达 50% 自动补仓一次 (最多3次)</p>
+                    <p class="pt-2 text-blue-400 font-bold text-left">● 亏损达 50% 自动补仓一次 (最多3次)</p>
                 </div>
-                <button onclick="saveBot()" class="w-full py-4 bg-[#0ecb81] text-[#0b0e11] rounded-2xl font-black uppercase text-sm shadow-xl">确认部署</button>
+                <button onclick="saveBot()" class="w-full py-4 bg-[#0ecb81] text-[#0b0e11] rounded-2xl font-black uppercase text-sm shadow-xl">确认部署方案</button>
             </div>
         </div>
     </div>
 
     <!-- 确认框 -->
     <div id="customModal">
-        <div class="bg-[#1e2329] p-8 rounded-[2rem] w-full max-w-xs text-center border border-white/5">
+        <div class="bg-[#1e2329] p-8 rounded-[2rem] w-full max-w-xs text-center border border-white/5 text-white">
             <h3 id="cmTitle" class="text-lg font-black text-[#f0b90b] mb-2 uppercase italic">操作确认</h3>
-            <p id="cmText" class="text-xs text-slate-400 mb-8 px-4">执行强制离场？</p>
+            <p id="cmText" class="text-xs text-slate-400 mb-8 px-4 text-center">执行强制离场？</p>
             <div class="flex gap-4">
                 <button onclick="closeCM()" class="flex-1 py-3 text-slate-500 font-black text-[10px] uppercase">取消</button>
-                <button id="cmConfirmBtn" class="flex-1 py-3 bg-[#f6465d] text-white rounded-xl font-black text-[10px] uppercase">执行</button>
+                <button id="cmConfirmBtn" class="flex-1 py-3 bg-[#f6465d] text-white rounded-xl font-black text-[10px] uppercase">执行指令</button>
             </div>
         </div>
     </div>
-
-    <audio id="alertAudio" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <script>
         let strategies = [];
@@ -295,21 +307,21 @@
             strategies.forEach(bot => {
                 const feed = marketFeed[bot.symbol];
                 if(!feed) return;
-                bot.entryTarget = feed.open1m * (1 + bot.offset / 100);
+                
+                bot.entryTarget = bot.manualPrice > 0 ? bot.manualPrice : feed.open1m * (1 + bot.offset / 100);
 
                 if(bot.state === 'IDLE') {
                     const rsiOk = feed.rsi15 >= bot.rsiLimit;
                     const priceOk = feed.price >= bot.entryTarget;
                     if(rsiOk && priceOk) {
                         bot.state = 'HOLDING'; bot.entryPrice = feed.price; bot.lastEntryPrice = feed.price; 
-                        bot.currentAmtU = 5; bot.entryTime = now; bot.maxPnlEver = 0;
+                        bot.currentAmtU = bot.addVal; bot.entryTime = now; bot.maxPnlEver = 0;
                         bot.halfExited = false; bot.entryCount = 1; bot.shieldActive = false; bot.pnl = 0;
                         triggerReminder(`[成交] ${bot.symbol} 入场价: ${bot.entryPrice.toFixed(4)}`, 'entry');
                     } else { bot.isRsiReady = rsiOk; }
                 } else if(bot.state === 'HOLDING') {
                     const durationMs = now - bot.entryTime;
                     const hoursElapsed = durationMs / (1000 * 60 * 60);
-                    
                     bot.pnl = (bot.entryPrice - feed.price) / bot.entryPrice * bot.lev * 100;
                     if(bot.pnl > bot.maxPnlEver) bot.maxPnlEver = bot.pnl;
 
@@ -318,12 +330,12 @@
                         triggerReminder(`[盾激活] ${bot.symbol} 盈利40%，开启均价保本`, 'system');
                     }
                     if(bot.shieldActive && feed.price > bot.entryPrice) {
-                        closePosition(bot, `盾平仓(保本)`, 'loss'); return;
+                        closePosition(bot, `保本强制离场`, 'loss'); return;
                     }
 
                     if(bot.pnl <= -50) {
                         if (bot.entryCount <= 3) {
-                            const oldVal = bot.currentAmtU; const newVal = 5;
+                            const oldVal = bot.currentAmtU; const newVal = bot.addVal;
                             bot.entryPrice = ((bot.entryPrice * oldVal) + (feed.price * newVal)) / (oldVal + newVal);
                             bot.currentAmtU += newVal;
                             bot.lastEntryPrice = feed.price;
@@ -331,18 +343,16 @@
                             bot.shieldActive = false; 
                             triggerReminder(`[加仓] ${bot.symbol} 亏损50%补仓完成，新均价: ${bot.entryPrice.toFixed(4)}`, 'add');
                         } else {
-                            closePosition(bot, `3次补仓完再亏50%强制平仓`, 'loss');
-                            return;
+                            closePosition(bot, `3次补仓完再亏50%强制平仓`, 'loss'); return;
                         }
                     }
 
                     if(bot.pnl >= 50 && !bot.halfExited) {
                         bot.totalProfit += (bot.currentAmtU / 2) * (bot.pnl / 100);
                         bot.currentAmtU /= 2; bot.halfExited = true;
-                        triggerReminder(`[止盈] ${bot.symbol} 已平半仓锁利`, 'profit');
+                        triggerReminder(`[半平] ${bot.symbol} 已锁利50%`, 'profit');
                     }
-
-                    if(hoursElapsed >= 1 && bot.maxPnlEver < 50) { closePosition(bot, "1h未达标", 'profit'); return; }
+                    if(hoursElapsed >= 1 && bot.maxPnlEver < 50) { closePosition(bot, "1h未达标离场", 'profit'); return; }
                     if(hoursElapsed >= 6) { closePosition(bot, "6h强制结清", 'profit'); return; }
                 }
             });
@@ -358,16 +368,16 @@
         function renderStrategies() {
             const grid = document.getElementById('strategyGrid');
             if(!grid) return;
-            if(strategies.length === 0) { grid.innerHTML = '<p class="col-span-full py-20 text-center opacity-30 text-[10px] font-black uppercase tracking-widest">等待部署...</p>'; return; }
+            if(strategies.length === 0) { grid.innerHTML = '<p class="col-span-full py-20 text-center opacity-30 text-[10px] font-black uppercase tracking-widest text-white">等待部署...</p>'; return; }
             grid.innerHTML = strategies.map(bot => {
                 const feed = marketFeed[bot.symbol] || { price: 0, rsi15: 0 };
                 const isReady = bot.state === 'IDLE' && bot.isRsiReady;
                 const h = bot.state === 'HOLDING' ? ((Date.now() - bot.entryTime) / (1000 * 60 * 60)).toFixed(2) : 0;
                 return `
-                <div class="app-card p-6 ${isReady ? 'waiting-glow' : ''} ${bot.isLive ? 'live-glow' : ''}">
+                <div class="app-card p-6 ${isReady ? 'waiting-glow' : ''} ${bot.isLive ? 'live-glow' : ''} text-left">
                     <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h4 class="font-black text-white italic uppercase text-sm">${bot.symbol}</h4>
+                        <div class="min-w-0 text-left">
+                            <h4 class="font-black text-white italic uppercase text-sm truncate">${bot.symbol}</h4>
                             <p class="text-[9px] text-slate-500 uppercase">${bot.isLive ? '实盘' : '模拟'} · ${bot.state==='HOLDING'?h+'h':'待机'}</p>
                         </div>
                         <div class="flex items-center gap-3">
@@ -377,26 +387,26 @@
                     </div>
                     <div class="text-center mb-6 border-b border-white/5 pb-4">
                         <p class="text-3xl font-mono font-black text-white tracking-tighter">${feed.price ? feed.price.toFixed(feed.price < 1 ? 5 : 4) : '---'}</p>
-                        <p class="text-[8px] text-slate-500 font-black tracking-widest mt-1 italic">Market Price</p>
+                        <p class="text-[8px] text-slate-500 uppercase font-black tracking-widest mt-1 italic text-center">Market Price</p>
                     </div>
                     <div class="flex justify-between items-center mb-6">
                         <div class="text-center flex-1">
                             <p class="text-[8px] text-slate-600 font-black uppercase mb-1">RSI (15m)</p>
                             <p class="text-xl font-black ${feed.rsi15 >= bot.rsiLimit ? 'rsi-high' : 'text-white'}">${feed.rsi15.toFixed(2)}</p>
                         </div>
-                        <div class="w-px h-8 bg-white/5"></div>
+                        <div class="w-px h-8 bg-white/5 mx-2"></div>
                         <div class="text-center flex-1">
-                            <p class="text-[8px] text-slate-600 font-black uppercase mb-1">PnL %</p>
+                            <p class="text-[8px] text-slate-600 font-black uppercase mb-1">Profit %</p>
                             <p class="text-xl font-mono font-black ${bot.pnl >= 0 ? 'profit' : 'loss'}">${(bot.pnl || 0).toFixed(2)}%</p>
                         </div>
                     </div>
                     <div class="bg-black/40 rounded-xl p-3 border border-white/5 flex justify-between items-center text-[10px] mb-2">
-                        <span class="text-slate-600 font-bold uppercase tracking-tight">均价/目标位</span>
-                        <p class="font-mono font-bold text-[#f0b90b]">${bot.state === 'HOLDING' ? bot.entryPrice.toFixed(4) : (bot.entryTarget ? bot.entryTarget.toFixed(4) : '---')}</p>
+                        <span class="text-slate-600 font-bold uppercase truncate pr-2">均价/目标位</span>
+                        <p class="font-mono font-bold text-[#f0b90b] whitespace-nowrap">${bot.state === 'HOLDING' ? bot.entryPrice.toFixed(4) : (bot.entryTarget ? bot.entryTarget.toFixed(4) : '---')}</p>
                     </div>
                     <div class="grid grid-cols-2 gap-2 mt-3">
-                         <div class="text-center bg-white/5 rounded-lg py-1.5"><span class="block text-[7px] text-slate-500 uppercase">补仓状态</span><span class="text-xs font-bold text-blue-400">${bot.state==='HOLDING'?(bot.entryCount-1)+'/3':'READY'}</span></div>
-                         <div class="text-center bg-white/5 rounded-lg py-1.5"><span class="block text-[7px] text-slate-500 uppercase">总获利</span><span class="text-xs font-bold text-white">${bot.totalProfit.toFixed(2)}U</span></div>
+                         <div class="text-center bg-white/5 rounded-lg py-1.5"><span class="block text-[7px] text-slate-500 uppercase">加仓</span><span class="text-xs font-bold text-blue-400">${bot.state==='HOLDING'?(bot.entryCount-1)+'/3':'READY'}</span></div>
+                         <div class="text-center bg-white/5 rounded-lg py-1.5"><span class="block text-[7px] text-slate-500 uppercase">总利</span><span class="text-xs font-bold text-white">${bot.totalProfit.toFixed(2)}U</span></div>
                     </div>
                     ${bot.shieldActive ? '<div class="text-center text-[9px] font-black text-emerald-500 uppercase mt-4 animate-pulse">● Shield Active ●</div>' : ''}
                 </div>`;
@@ -407,7 +417,7 @@
 
         async function fetchMarketData(type = 'spot') {
             const list = document.getElementById('gainersList'); if(!list) return;
-            list.innerHTML = '<p class="py-10 text-center text-[10px] opacity-30 font-black italic">正在刷新...</p>';
+            list.innerHTML = '<p class="py-10 text-center text-[10px] opacity-30 font-black italic">数据更新中...</p>';
             const endpoint = type === 'spot' ? `${SPOT_BASE}/api/v3/ticker/24hr` : `${FAPI_BASE}/fapi/v1/ticker/24hr`;
             try {
                 const r = await fetch(endpoint).then(res => res.json());
@@ -423,17 +433,17 @@
             list.innerHTML = data.map(c => {
                 const isUp = parseFloat(c.priceChangePercent) >= 0;
                 return `
-                <div class="flex justify-between items-center py-4 px-2 hover:bg-white/5 transition-colors">
+                <div class="flex justify-between items-center py-4 px-2 hover:bg-white/5 transition-colors text-white">
                     <div class="w-1/3 text-left">
                         <p class="font-black text-sm text-white uppercase tracking-tight">${c.symbol.replace('USDT', '')}</p>
-                        <p class="text-[8px] text-slate-500 font-bold uppercase">USDT PERP</p>
+                        <p class="text-[8px] text-slate-500 font-bold uppercase tracking-tighter">USDT PERP</p>
                     </div>
                     <div class="w-1/3 text-center">
                         <p class="text-xs font-mono font-bold text-slate-200">${parseFloat(c.lastPrice).toFixed(parseFloat(c.lastPrice) < 1 ? 5 : 3)}</p>
                     </div>
                     <div class="w-1/3 text-right flex items-center justify-end gap-3">
                         <span class="text-xs font-black ${isUp ? 'profit' : 'loss'}">${isUp ? '+' : ''}${parseFloat(c.priceChangePercent).toFixed(2)}%</span>
-                        <button onclick="prefillAndOpen('${c.symbol}')" class="bg-[#f0b90b] text-[#0b0e11] px-3 py-1 rounded text-[9px] font-black uppercase shadow-lg">部署</button>
+                        <button onclick="prefillAndOpen('${c.symbol}')" class="bg-[#f0b90b] text-[#0b0e11] px-3 py-1 rounded text-[9px] font-black uppercase shadow-lg active:scale-95">部署</button>
                     </div>
                 </div>`;
             }).join('');
@@ -460,10 +470,21 @@
                 const usdt = data.find(b => b.asset === 'USDT'); if(usdt) { document.getElementById('liveBalance').innerText = parseFloat(usdt.balance).toFixed(2) + " U"; document.getElementById('apiStatusDot').className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse"; }
             } catch(e) {}
         }
+        
         function saveBot() {
-            const bot = { id: Date.now(), symbol: document.getElementById('botSymbol').value.toUpperCase().trim(), rsiLimit: parseFloat(document.getElementById('botRsiLimit').value), offset: parseFloat(document.getElementById('botOffset').value), lev: parseFloat(document.getElementById('botLev').value), addVal: 5, state: 'IDLE', isLive: false, isRsiReady: false, shieldActive: false, pnl: 0, totalProfit: 0, currentAmtU: 5, entryTarget: 0, entryTime: null, halfExited: false, maxPnlEver: 0, entryCount: 0, lastEntryPrice: 0 };
+            const bot = { 
+                id: Date.now(), 
+                symbol: document.getElementById('botSymbol').value.toUpperCase().trim(), 
+                manualPrice: parseFloat(document.getElementById('botManualPrice').value) || 0,
+                rsiLimit: parseFloat(document.getElementById('botRsiLimit').value), 
+                offset: parseFloat(document.getElementById('botOffset').value), 
+                lev: parseFloat(document.getElementById('botLev').value), 
+                addVal: parseFloat(document.getElementById('botAddVal').value) || 5, // 动态读取设置金额
+                state: 'IDLE', isLive: false, isRsiReady: false, shieldActive: false, pnl: 0, totalProfit: 0, currentAmtU: 0, entryTarget: 0, entryTime: null, halfExited: false, maxPnlEver: 0, entryCount: 0, lastEntryPrice: 0 
+            };
             strategies.push(bot); saveData(); renderStrategies(); closeModal(); showTab('lab');
         }
+
         function toggleLiveMode(id) { const bot = strategies.find(s => s.id === id); if (bot) { bot.isLive = !bot.isLive; saveData(); renderStrategies(); } }
         function saveData() { localStorage.setItem('sentinel_v28_strategies', JSON.stringify(strategies)); }
         function deleteBot(id) { strategies = strategies.filter(s=>s.id!==id); saveData(); renderStrategies(); }
