@@ -3,368 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Protocol Gateway</title>
+    <title>KANG System Portal</title>
     
-    <!-- ✅ 太极图标 -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='https://raw.githubusercontent.com/phanthuanhfx60070-kang/kang/refs/heads/main/logo.png' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='white'/%3E%3Cpath d='M32,0 A32,32 0 0,0 32,64 A16,16 0 0,0 32,32 A16,16 0 0,1 32,0 Z' fill='%2306b6d4'/%3E%3Cpath d='M32,0 A16,16 0 0,1 32,32 A16,16 0 0,0 32,64 A32,32 0 0,0 32,0 Z' fill='%23FFD700'/%3E%3C/svg%3E" type="image/svg+xml">
+    <!-- ✅ 网站图标 -->
+    <link rel="icon" href="https://raw.githubusercontent.com/phanthuanhfx60070-kang/kang/refs/heads/main/logo.png" type="image/png">
 
-    <!-- ✅ 极速源 -->
-    <script src="https://cdn.staticfile.org/ethers/5.7.2/ethers.umd.min.js"></script>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+    <!-- FontAwesome 图标 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=VT323&display=swap" rel="stylesheet">
+
+    <!-- 📊 Google Analytics (谷歌分析) 已配置 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NXKXXB84W5"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      // 🔴 这里填的是衡量 ID (Measurement ID)
+      gtag('config', 'G-NXKXXB84W5'); 
+    </script>
     
     <style>
-        :root { --theme-color: #FFD700; --theme-shadow: rgba(255, 215, 0, 0.5); }
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0f172a;
-            /* 背景图 */
+            /* 高级深色背景 */
             background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
                               radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
                               radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
             background-attachment: fixed; background-size: cover; color: #fff;
-            min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-            padding: 2rem 1rem; gap: 1.5rem;
+            min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 2rem 1rem;
         }
 
-        /* 🟢 行情胶囊样式 */
-        .ticker-pill {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 999px;
-            padding: 6px 16px;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: 15px; /* 距离标题的距离 */
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            transition: all 0.3s;
-            position: relative; z-index: 60;
-        }
-        .ticker-pill:hover { background: rgba(0, 0, 0, 0.6); transform: translateY(-2px); border-color: rgba(255, 255, 255, 0.3); }
-        .deploy-link { text-decoration: none; color: #facc15; font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 6px; }
-        .deploy-link:hover { color: #fff; text-shadow: 0 0 8px #facc15; }
+        /* 标题光效 */
+        .title-glow { text-shadow: 0 0 30px rgba(255, 255, 255, 0.2); }
 
-        /* 双币卡片 */
-        .gateway-container { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 450px; z-index: 50; margin-top: 20px; }
+        /* 卡片容器：电脑端2列，手机端1列 */
+        .gateway-grid { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 20px; 
+            width: 100%; 
+            max-width: 800px; /* 稍微宽一点容纳两列 */
+            z-index: 50; 
+            margin-top: 2rem;
+        }
+        @media (min-width: 768px) {
+            .gateway-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        /* 通用卡片样式 */
         .gateway-card {
-            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 2rem;
-            text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden;
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 24px; 
+            padding: 2rem;
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            position: relative; 
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
         }
         .gateway-card:hover { transform: translateY(-5px) scale(1.02); }
-        
-        .card-lift:hover { box-shadow: 0 0 30px rgba(6, 182, 212, 0.4); border-color: #06b6d4; }
-        .text-lift { color: #06b6d4; text-shadow: 0 0 10px rgba(6, 182, 212, 0.5); }
-        
-        .card-kang:hover { box-shadow: 0 0 30px rgba(250, 204, 21, 0.4); border-color: #facc15; }
-        .text-kang { color: #facc15; text-shadow: 0 0 10px rgba(250, 204, 21, 0.5); }
+        .gateway-card:active { transform: scale(0.98); }
 
-        /* 挖矿界面通用 */
-        .glass-card {
-            background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            width: 100%; max-width: 400px; border-radius: 24px; padding: 2rem; position: relative; z-index: 10;
-        }
-        .btn-theme {
-            background: var(--theme-color); color: #000; transition: all 0.2s; font-weight: 800; border: none; cursor: pointer;
-            box-shadow: 0 4px 15px var(--theme-shadow);
-        }
-        .btn-theme:disabled { background: #475569; color: #94a3b8; cursor: not-allowed; box-shadow: none; opacity: 0.6; }
-        
-        /* 红色清场按钮 */
-        .btn-clear {
-            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: #fff; transition: all 0.2s; font-weight: 800; border: none; cursor: pointer;
-            box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); animation: pulse 2s infinite;
-        }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        /* --- 颜色主题定义 --- */
 
-        .pot-glow { text-shadow: 0 0 25px var(--theme-shadow); color: var(--theme-color); }
-        .game-card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; width: 100%; max-width: 400px; padding: 1rem; text-align: center; overflow: hidden; }
-        canvas { background: rgba(255, 255, 255, 0.1); border-radius: 8px; width: 100%; touch-action: none; }
-        .hidden { display: none !important; }
-        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        /* 🟦 LIFT (青色) */
+        .theme-lift:hover { box-shadow: 0 0 30px rgba(6, 182, 212, 0.3); border-color: #06b6d4; background: rgba(6, 182, 212, 0.05); }
+        .theme-lift .icon { color: #06b6d4; text-shadow: 0 0 15px rgba(6, 182, 212, 0.4); }
+        .theme-lift .bar { background-color: #06b6d4; }
+
+        /* 🟨 KANG (金色) */
+        .theme-kang:hover { box-shadow: 0 0 30px rgba(250, 204, 21, 0.3); border-color: #facc15; background: rgba(250, 204, 21, 0.05); }
+        .theme-kang .icon { color: #facc15; text-shadow: 0 0 15px rgba(250, 204, 21, 0.4); }
+        .theme-kang .bar { background-color: #facc15; }
+
+        /* 🟦 BNS 数据 (深蓝/靛蓝) */
+        .theme-data:hover { box-shadow: 0 0 30px rgba(99, 102, 241, 0.3); border-color: #6366f1; background: rgba(99, 102, 241, 0.05); }
+        .theme-data .icon { color: #6366f1; text-shadow: 0 0 15px rgba(99, 102, 241, 0.4); }
+        .theme-data .bar { background-color: #6366f1; }
+
+        /* 🟧 AUTO 哨兵 (橙红色) */
+        .theme-auto:hover { box-shadow: 0 0 30px rgba(249, 115, 22, 0.3); border-color: #f97316; background: rgba(249, 115, 22, 0.05); }
+        .theme-auto .icon { color: #f97316; text-shadow: 0 0 15px rgba(249, 115, 22, 0.4); }
+        .theme-auto .bar { background-color: #f97316; }
+
+        /* 动画 */
+        .fade-in { animation: fadeIn 0.8s ease-out forwards; opacity: 0; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .icon { font-size: 3rem; margin-bottom: 1rem; transition: transform 0.3s; }
+        .gateway-card:hover .icon { transform: scale(1.1); }
+        .bar { width: 40px; height: 4px; border-radius: 2px; margin-bottom: 1rem; opacity: 0.7; }
     </style>
 </head>
 <body>
 
-    <!-- 🟢 顶部标题区 + 行情部署条 -->
-    <div class="text-center z-20" id="headerSection">
-        <h1 class="text-3xl font-extrabold tracking-tight text-white">PROTOCOL <span class="text-yellow-500">GATEWAY</span></h1>
-        
-        <!-- 👇 这里是你要求的：24小时涨幅 + 一键部署 👇 -->
-        <div class="ticker-pill">
-            <!-- 涨幅部分 -->
-            <div class="flex items-center gap-2 border-r border-gray-500/50 pr-4 mr-1">
-                <span class="relative flex h-2 w-2">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                </span>
-                <div class="flex flex-col items-start leading-none">
-                    <span class="text-[9px] text-gray-400 uppercase">24h Change</span>
-                    <span class="text-[12px] font-bold text-green-400 font-mono">+128.5%</span>
-                </div>
-            </div>
-
-            <!-- 部署部分 (点击跳转 Vercel 部署) -->
-            <a href="https://vercel.com/new" target="_blank" class="deploy-link">
-                <i class="fas fa-rocket text-sm"></i>
-                <span>DEPLOY NOW</span>
-            </a>
-        </div>
+    <!-- 顶部 Logo/标题区 -->
+    <div class="text-center z-20 fade-in">
+        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-white title-glow mb-2">
+            KANG <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600">UNIVERSE</span>
+        </h1>
+        <p class="text-xs md:text-sm text-gray-400 tracking-[0.3em] uppercase">Select Your Destination</p>
     </div>
 
-    <!-- 🟢 1. 入口选择页 -->
-    <div id="gatewayView" class="gateway-container fade-in">
-        <div class="text-center mb-2">
-            <p class="text-xs text-gray-500 tracking-widest">CHOOSE YOUR PATH</p>
-        </div>
+    <!-- 核心选择网格 -->
+    <div class="gateway-grid fade-in" style="animation-delay: 0.2s;">
+        
+        <!-- 1. LIFT Token -->
+        <a href="https://www.kang.meme/LIFT" class="gateway-card theme-lift">
+            <div class="icon"><i class="fas fa-cube"></i></div>
+            <h2 class="text-2xl font-black text-white mb-2">LIFT TOKEN</h2>
+            <div class="bar"></div>
+            <p class="text-xs text-gray-400 font-mono">CYBER • TECH • FUTURE</p>
+        </a>
 
-        <!-- LIFT 入口 -->
-        <div class="gateway-card card-lift" onclick="selectProtocol('LIFT')">
-            <div class="text-4xl mb-2 text-lift"><i class="fas fa-cube"></i></div>
-            <h2 class="text-2xl font-black text-lift">LIFT</h2>
-            <p class="text-xs text-gray-400 mt-2">Cyber • Blue • Tech</p>
-        </div>
+        <!-- 2. KANG Token -->
+        <a href="https://www.kang.meme/KANG" class="gateway-card theme-kang">
+            <div class="icon"><i class="fas fa-bolt"></i></div>
+            <h2 class="text-2xl font-black text-white mb-2">KANG TOKEN</h2>
+            <div class="bar"></div>
+            <p class="text-xs text-gray-400 font-mono">GOLD • POWER • MEME</p>
+        </a>
 
-        <!-- KANG 入口 -->
-        <div class="gateway-card card-kang" onclick="selectProtocol('KANG')">
-            <div class="text-4xl mb-2 text-kang"><i class="fas fa-bolt"></i></div>
-            <h2 class="text-2xl font-black text-kang">KANG</h2>
-            <p class="text-xs text-gray-400 mt-2">Gold • Power • Meme</p>
-        </div>
+        <!-- 3. 交易数据智能提取 -->
+        <a href="https://www.kang.meme/bns" class="gateway-card theme-data">
+            <div class="icon"><i class="fas fa-database"></i></div>
+            <h2 class="text-xl font-bold text-white mb-2">(交易数据智能提取)</h2>
+            <div class="bar"></div>
+            <p class="text-xs text-gray-400 font-mono">BNS DATA • SMART ANALYSIS</p>
+        </a>
+
+        <!-- 4. 哨兵量化系统 -->
+        <a href="https://www.kang.meme/auto" class="gateway-card theme-auto">
+            <div class="icon"><i class="fas fa-robot"></i></div>
+            <h2 class="text-xl font-bold text-white mb-2">哨兵量化系统</h2>
+            <div class="bar"></div>
+            <p class="text-xs text-gray-400 font-mono">SENTINEL QUANT • AUTO TRADE</p>
+        </a>
+
     </div>
 
-    <!-- 🟢 2. 挖矿主界面 (隐藏，点击后显示) -->
-    <div id="appView" class="w-full flex flex-col items-center gap-6 hidden fade-in">
+    <!-- 底部版权 & 流量统计 -->
+    <div class="fixed bottom-4 w-full text-center z-40 fade-in" style="animation-delay: 0.4s;">
         
-        <!-- 顶部导航 -->
-        <div class="w-full max-w-[400px] flex justify-between items-center px-2">
-            <button onclick="goBack()" class="text-gray-400 hover:text-white text-sm"><i class="fas fa-arrow-left"></i> Back</button>
-            <div class="text-center">
-                <h1 class="text-2xl font-extrabold tracking-tight" id="protocolTitle" style="color:var(--theme-color)">PROTOCOL</h1>
-            </div>
-            <div class="w-10"></div>
+        <div class="text-gray-600 text-[10px] font-mono mb-2">
+            SECURE GATEWAY // ENCRYPTED
         </div>
 
-        <div class="glass-card">
-            <div class="text-center mb-6">
-                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Current Reward Pot</div>
-                <div class="relative">
-                    <div id="potValue" class="text-3xl md:text-5xl font-black pot-glow font-mono break-all leading-tight">LOADING...</div>
-                    <div class="text-xs font-bold mt-2" style="color:var(--theme-color)">PENDING TOKENS</div>
-                    <div id="nodeStatus" class="text-[9px] text-gray-500 mt-1">Connecting...</div>
-                </div>
-            </div>
-
-            <div id="connectView" class="text-center">
-                <button onclick="connectWallet()" class="btn-theme w-full py-4 rounded-xl text-lg shadow-lg flex items-center justify-center gap-2">
-                    <i class="fas fa-wallet"></i> 连接钱包 (Connect)
-                </button>
-            </div>
-
-            <div id="miningView" class="hidden space-y-4">
-                <div id="statusLog" class="bg-gray-800/50 rounded-lg p-3 text-xs text-center text-gray-300 font-mono border border-gray-700/50">
-                    准备就绪 System Ready
-                </div>
-
-                <div id="infoBar" class="bg-blue-900/30 border border-blue-700/50 rounded-lg p-3 text-left hidden">
-                    <div class="text-[11px] text-blue-200 flex items-center gap-2">
-                        <i class="fas fa-info-circle"></i> <span id="infoText">检测中...</span>
-                    </div>
-                </div>
-
-                <div class="grid gap-3">
-                    <!-- 抢夺 (颜色动态) -->
-                    <button id="submitBtn" onclick="submitClaim()" class="btn-theme w-full py-4 rounded-xl text-lg shadow-lg relative overflow-hidden">
-                        <div class="relative z-10 flex items-center justify-center gap-2">
-                            <i class="fas fa-hammer"></i> 立即抢夺 (Submit)
-                        </div>
-                    </button>
-
-                    <!-- 结算 / 清场 -->
-                    <button id="finalizeBtn" onclick="finalizePayout()" disabled class="w-full py-4 rounded-xl font-bold text-lg shadow-lg border-2 border-gray-600 text-gray-500">
-                        <div class="flex items-center justify-center gap-2">
-                            <i class="fas fa-download"></i> 结算领币 (Finalize)
-                        </div>
-                    </button>
-                </div>
-
-                <div class="text-center pt-2">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/20 text-[10px] text-gray-400 font-mono">
-                        <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                        <span id="userDisplay">0x00...0000</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 mt-6 pt-4 border-t border-gray-700">
-                <div class="text-center cursor-pointer p-2 bg-black/20 rounded hover:bg-black/40 text-[10px] text-gray-400" onclick="copyCA()">
-                    <i class="fas fa-copy mb-1"></i><br>复制合约
-                </div>
-                <div class="text-center cursor-pointer p-2 bg-black/20 rounded hover:bg-black/40 text-[10px] text-gray-400" onclick="openBscScan()">
-                    <i class="fas fa-external-link-alt mb-1"></i><br>查看浏览器
-                </div>
-            </div>
+        <!-- 📊 方案二：可视化计数器 (不蒜子) -->
+        <div class="text-gray-500 text-[9px] font-mono flex items-center justify-center gap-4 bg-black/20 backdrop-blur-sm py-1 px-3 rounded-full inline-block mx-auto border border-gray-800/50">
+            <span id="busuanzi_container_site_pv" style="display:none">
+                <i class="fas fa-eye text-blue-500/70 mr-1"></i>
+                Total Views: <span id="busuanzi_value_site_pv" class="text-gray-300 font-bold"></span>
+            </span>
+            <span class="text-gray-700">|</span>
+            <span id="busuanzi_container_site_uv" style="display:none">
+                <i class="fas fa-user text-yellow-500/70 mr-1"></i>
+                Visitors: <span id="busuanzi_value_site_uv" class="text-gray-300 font-bold"></span>
+            </span>
         </div>
 
-        <!-- 游戏 -->
-        <div class="game-card fade-in">
-            <div class="flex justify-between items-center mb-2 px-1">
-                <div class="text-[10px] text-gray-300 font-mono font-bold">WAIT & PLAY</div>
-                <div class="text-[10px] text-yellow-400 font-mono font-bold">SCORE: <span id="gameScore">0</span></div>
-            </div>
-            <canvas id="dinoCanvas" width="600" height="150"></canvas>
-            <div class="text-[10px] text-gray-400 mt-2 font-mono blink" id="gameTip">TAP TO START</div>
-        </div>
     </div>
 
-    <script>
-        // 🟢 配置区域：请在此处填入两个合约地址
-        const CONFIG = {
-            KANG: {
-                address: "0x65a762e8B7639596dbFBCcd9A541d44B0CF67762",
-                color: "#FFD700", shadow: "rgba(255, 215, 0, 0.5)", icon: "🦖"
-            },
-            LIFT: {
-                // ⚠️ 记得换成真的 LIFT 地址
-                address: "0x65a762e8B7639596dbFBCcd9A541d44B0CF67762", 
-                color: "#06b6d4", shadow: "rgba(6, 182, 212, 0.5)", icon: "💠"
-            }
-        };
+    <!-- 计数器脚本 -->
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 
-        const ABI = [
-            "function submitClaim() public",
-            "function finalizePayout() public",
-            "function checkCurrentPot() public view returns (uint256)",
-            "function currentCycle() public view returns (uint256, uint256, address[], bool)"
-        ];
-        const RPC_LIST = ["https://bsc-dataseed.binance.org/", "https://bsc-dataseed1.defibit.io/", "https://bsc-dataseed1.ninicoin.io/"];
-
-        let currentProtocol = null;
-        let provider, signer, contract, readOnlyContract;
-        
-        const el = {
-            header: document.getElementById('headerSection'),
-            gateway: document.getElementById('gatewayView'), app: document.getElementById('appView'), title: document.getElementById('protocolTitle'),
-            pot: document.getElementById('potValue'), nodeStatus: document.getElementById('nodeStatus'), connectView: document.getElementById('connectView'),
-            miningView: document.getElementById('miningView'), status: document.getElementById('statusLog'), user: document.getElementById('userDisplay'),
-            submit: document.getElementById('submitBtn'), finalize: document.getElementById('finalizeBtn'), infoBar: document.getElementById('infoBar'), infoText: document.getElementById('infoText')
-        };
-
-        // --- 核心切换逻辑 ---
-        function selectProtocol(name) {
-            currentProtocol = name; const cfg = CONFIG[name];
-            document.documentElement.style.setProperty('--theme-color', cfg.color);
-            document.documentElement.style.setProperty('--theme-shadow', cfg.shadow);
-            
-            el.title.innerText = name + " PROTOCOL"; el.pot.innerText = "LOADING...";
-            
-            // 隐藏入口和顶部标题
-            el.gateway.classList.add('hidden');
-            el.header.classList.add('hidden'); // 👈 进入内页后隐藏顶部大标题
-            
-            el.app.classList.remove('hidden');
-            initContract(); initGame();
-        }
-
-        function goBack() { location.reload(); }
-
-        // --- 合约逻辑 ---
-        async function initContract() {
-            if(typeof ethers === 'undefined') { el.pot.innerText = "Lib Error"; return; }
-            const ca = CONFIG[currentProtocol].address;
-            let connected = false;
-            for (let rpc of RPC_LIST) {
-                try {
-                    const tempProvider = new ethers.providers.JsonRpcProvider(rpc);
-                    readOnlyContract = new ethers.Contract(ca, ABI, tempProvider);
-                    await readOnlyContract.checkCurrentPot();
-                    el.nodeStatus.innerText = "🟢 Node Synced (" + currentProtocol + ")";
-                    connected = true; loopPot(); checkGlobalState(); setInterval(checkGlobalState, 3000); break;
-                } catch(e) {}
-            }
-            if(!connected) { el.pot.innerText = "Net Error"; }
-            if(window.ethereum) { const acc = await window.ethereum.request({method:'eth_accounts'}); if(acc.length > 0) connectWallet(); }
-        }
-
-        async function loopPot() {
-            if(readOnlyContract) { try { const v = await readOnlyContract.checkCurrentPot(); el.pot.innerText = parseFloat(ethers.utils.formatUnits(v, 18)).toFixed(4); } catch(e) {} }
-            setTimeout(loopPot, 3000);
-        }
-
-        // 🔴 战略清场逻辑
-        async function checkGlobalState() {
-            if(!readOnlyContract) return;
-            try {
-                const cycleData = await readOnlyContract.currentCycle();
-                const startTime = cycleData[1]; const isFinalized = cycleData[3];
-                if(startTime.gt(0) && !isFinalized) {
-                    el.submit.disabled = true; el.submit.innerHTML = "<i class='fas fa-lock'></i> LOCKED"; el.submit.style.opacity = "0.5";
-                    el.finalize.disabled = false; el.finalize.className = "btn-clear w-full py-4 rounded-xl font-bold text-lg shadow-lg"; 
-                    el.finalize.innerHTML = "<i class='fas fa-trash'></i> 强制结算 (只清场)"; el.finalize.style.border = "none"; el.finalize.style.color = "white";
-                    el.infoBar.classList.remove('hidden'); el.infoText.innerText = "⚠️ 拥堵中！请点击红色按钮清场。";
-                } else {
-                    el.submit.disabled = false; el.submit.innerHTML = "<i class='fas fa-hammer'></i> 立即抢夺"; el.submit.style.opacity = "1";
-                    el.finalize.disabled = true; el.finalize.className = "w-full py-4 rounded-xl font-bold text-lg border-2 border-gray-600 text-gray-500 cursor-not-allowed";
-                    el.finalize.style.background = "transparent"; el.finalize.style.boxShadow = "none"; el.finalize.innerHTML = "等待抢夺..."; el.infoBar.classList.add('hidden');
-                }
-            } catch(e) {}
-        }
-
-        async function connectWallet() {
-            if(!window.ethereum) return alert("请在钱包中打开！");
-            try {
-                await window.ethereum.request({ method: 'eth_requestAccounts' }); await switchToBSC();
-                provider = new ethers.providers.Web3Provider(window.ethereum); signer = provider.getSigner();
-                const ca = CONFIG[currentProtocol].address; contract = new ethers.Contract(ca, ABI, signer); readOnlyContract = contract;
-                const addr = await signer.getAddress(); el.connectView.classList.add('hidden'); el.miningView.classList.remove('hidden');
-                el.user.innerText = addr.slice(0,6) + "..." + addr.slice(-4); checkGlobalState();
-            } catch(e) { alert("连接失败"); }
-        }
-
-        async function submitClaim() {
-            try { setStatus("请求签名...", "loading"); const tx = await contract.submitClaim(); setStatus("上链中...", "loading"); await tx.wait(); setStatus("✅ 成功！等待结算", "success"); checkGlobalState(); } catch(e) { handleErr(e); }
-        }
-
-        async function finalizePayout() {
-            try { setStatus("清场中...", "loading"); const tx = await contract.finalizePayout(); await tx.wait(); setStatus("🧹 已清场，刷新中...", "success"); setTimeout(() => { location.reload(); }, 2000); } catch(e) { handleErr(e); }
-        }
-
-        async function switchToBSC() {
-            try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x38' }] }); } catch (e) {
-                if (e.code === 4902) await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x38', chainName: 'Binance Smart Chain', nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 }, rpcUrls: ['https://bsc-dataseed.binance.org/'], blockExplorerUrls: ['https://bscscan.com/'] }] });
-            }
-        }
-
-        function setStatus(msg, type) {
-            const s = document.getElementById('statusLog'); s.innerText = msg;
-            if(type === 'loading') s.className = "bg-blue-900/30 text-blue-300 border border-blue-800 rounded p-3 text-xs text-center";
-            else if(type === 'success') s.className = "bg-green-900/30 text-green-300 border border-green-800 rounded p-3 text-xs text-center";
-            else s.className = "bg-gray-800/50 text-gray-300 border border-gray-700/50 rounded p-3 text-xs text-center";
-        }
-        function handleErr(e) { let m = e.reason || "交易失败"; if(m.includes("user rejected")) m = "用户取消"; if(m.includes("Already submitted")) { m = "请清场"; checkGlobalState(); } setStatus("❌ " + m, "error"); }
-        function copyCA() { navigator.clipboard.writeText(CONFIG[currentProtocol].address); alert("✅ 已复制"); }
-        function openBscScan() { window.open(`https://bscscan.com/address/${CONFIG[currentProtocol].address}`, '_blank'); }
-
-        function initGame() {
-            const canvas = document.getElementById('dinoCanvas'); const ctx = canvas.getContext('2d'); const scoreEl = document.getElementById('gameScore');
-            let gameRunning = false, score = 0; let dino = { x: 50, y: 110, dy: 0, jumpPower: -8, ground: 110 }; let cactus = { x: 600, y: 110, speed: 4 }; let gravity = 0.4;
-            function reset() { dino.y = dino.ground; dino.dy = 0; cactus.x = 600; score = 0; scoreEl.innerText = 0; gameRunning = true; document.getElementById('gameTip').innerText = ">>> RUNNING <<<"; requestAnimationFrame(update); }
-            function jump() { if(!gameRunning) reset(); else if(dino.y === dino.ground) dino.dy = dino.jumpPower; }
-            canvas.addEventListener('mousedown', jump); canvas.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); }); document.addEventListener('keydown', (e) => { if(e.code === 'Space') { e.preventDefault(); jump(); } });
-            function update() {
-                if(!gameRunning) return; ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.beginPath(); ctx.moveTo(0, 125); ctx.lineTo(600, 125); ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 2; ctx.stroke();
-                if(dino.y < dino.ground) dino.dy += gravity; dino.y += dino.dy; if(dino.y > dino.ground) { dino.y = dino.ground; dino.dy = 0; }
-                ctx.font = "30px serif"; ctx.textAlign = "left"; ctx.textBaseline = "bottom"; ctx.fillText(CONFIG[currentProtocol] ? CONFIG[currentProtocol].icon : "🦖", dino.x, dino.y + 15); 
-                cactus.x -= cactus.speed; if(cactus.x < -30) { cactus.x = 600 + Math.random() * 200; score++; scoreEl.innerText = score; cactus.speed += 0.1; } ctx.fillText("🌵", cactus.x, 125);
-                if(dino.x < cactus.x + 20 && dino.x + 20 > cactus.x && dino.y > dino.ground - 20) { gameRunning = false; ctx.fillStyle = 'white'; ctx.font = 'bold 24px monospace'; ctx.textAlign = 'center'; ctx.fillText("GAME OVER", 300, 60); document.getElementById('gameTip').innerText = "TAP TO RESTART"; } else requestAnimationFrame(update);
-            }
-            ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = 'bold 20px monospace'; ctx.textAlign = 'center'; ctx.fillText("TAP TO START", 300, 70);
-        }
-    </script>
 </body>
 </html>
