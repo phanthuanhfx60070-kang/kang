@@ -80,18 +80,18 @@
 </head>
 <body>
 
-    <!-- 顶部 -->
-    <div id="topHeader" class="sticky top-0 z-50 bg-[#0b0e11]/95 backdrop-blur-md border-b border-[#2b3139] px-6 py-4 flex justify-between items-center">
-        <div>
-            <h1 class="text-xl font-black text-[#f0b90b] italic tracking-tighter uppercase">Sentinel Pro</h1>
-            <div class="flex items-center gap-2">
-                <span id="apiStatusDot" class="w-2 h-2 rounded-full bg-slate-600"></span>
-                <p id="globalStatus" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Hard-Stop Logic Ready</p>
+    <!-- 顶部状态 (优化手机端布局) -->
+    <div id="topHeader" class="sticky top-0 z-50 bg-[#0b0e11]/95 backdrop-blur-md border-b border-[#2b3139] px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
+        <div class="flex-shrink min-w-0 pr-2">
+            <h1 class="text-lg sm:text-xl font-black text-[#f0b90b] italic tracking-tighter uppercase truncate">Sentinel Pro</h1>
+            <div class="flex items-center gap-1 sm:gap-2">
+                <span id="apiStatusDot" class="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-slate-600 flex-shrink-0"></span>
+                <p id="globalStatus" class="text-[7px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate">Precision Engine Ready</p>
             </div>
         </div>
-        <div class="flex gap-2">
-            <button onclick="confirmAction('ALL_TP')" class="bg-[#0ecb81] text-white px-4 py-2 rounded-full font-black text-[10px] shadow-lg">一键全平</button>
-            <button onclick="openAddModal()" class="bg-[#f0b90b] text-[#0b0e11] px-4 py-2 rounded-full font-black text-[10px] shadow-lg">+ 部署</button>
+        <div class="flex gap-1.5 sm:gap-2 flex-shrink-0">
+            <button onclick="confirmAction('ALL_TP')" class="bg-[#0ecb81] text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-full font-black text-[9px] sm:text-[10px] shadow-lg active:scale-95 transition-transform whitespace-nowrap">一键全平</button>
+            <button onclick="openAddModal()" class="bg-[#f0b90b] text-[#0b0e11] px-3 sm:px-4 py-1.5 sm:py-2 rounded-full font-black text-[9px] sm:text-[10px] shadow-lg active:scale-95 transition-transform whitespace-nowrap">+ 部署</button>
         </div>
     </div>
 
@@ -156,16 +156,16 @@
             <span class="text-[9px] font-black uppercase">终端</span>
         </button>
         <button onclick="showTab('market')" id="nav-market" class="nav-item flex flex-col items-center gap-1 flex-1 text-slate-500">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
             <span class="text-[9px] font-black uppercase">行情</span>
         </button>
         <button onclick="showTab('alerts')" id="nav-alerts" class="nav-item flex flex-col items-center gap-1 flex-1 text-slate-500">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
             <span class="text-[9px] font-black uppercase">日志</span>
         </button>
         <button onclick="showTab('account')" id="nav-account" class="nav-item flex flex-col items-center gap-1 flex-1 text-slate-500">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-            <span class="text-[9px] font-black uppercase">配置</span>
+            <span class="text-[9px] font-black uppercase">参数</span>
         </button>
     </nav>
 
@@ -313,7 +313,6 @@
                     bot.pnl = (bot.entryPrice - feed.price) / bot.entryPrice * bot.lev * 100;
                     if(bot.pnl > bot.maxPnlEver) bot.maxPnlEver = bot.pnl;
 
-                    // 1. 保本盾
                     if(!bot.shieldActive && bot.pnl >= 40) {
                         bot.shieldActive = true;
                         triggerReminder(`[盾激活] ${bot.symbol} 盈利40%，开启均价保本`, 'system');
@@ -322,32 +321,27 @@
                         closePosition(bot, `盾平仓(保本)`, 'loss'); return;
                     }
 
-                    // 2. 核心补仓及终极止损逻辑：亏损50%时处理
                     if(bot.pnl <= -50) {
                         if (bot.entryCount <= 3) {
-                            // 执行自动加仓 (1-3次)
                             const oldVal = bot.currentAmtU; const newVal = 5;
                             bot.entryPrice = ((bot.entryPrice * oldVal) + (feed.price * newVal)) / (oldVal + newVal);
                             bot.currentAmtU += newVal;
                             bot.lastEntryPrice = feed.price;
                             bot.entryCount += 1;
-                            bot.shieldActive = false; // 补仓重置盾状态
+                            bot.shieldActive = false; 
                             triggerReminder(`[加仓] ${bot.symbol} 亏损50%补仓完成，新均价: ${bot.entryPrice.toFixed(4)}`, 'add');
                         } else {
-                            // 3次补仓完后再亏损50%，执行强制平仓
                             closePosition(bot, `3次补仓完再亏50%强制平仓`, 'loss');
                             return;
                         }
                     }
 
-                    // 3. 50% 阶梯止盈
                     if(bot.pnl >= 50 && !bot.halfExited) {
                         bot.totalProfit += (bot.currentAmtU / 2) * (bot.pnl / 100);
                         bot.currentAmtU /= 2; bot.halfExited = true;
                         triggerReminder(`[止盈] ${bot.symbol} 已平半仓锁利`, 'profit');
                     }
 
-                    // 时间锁逻辑
                     if(hoursElapsed >= 1 && bot.maxPnlEver < 50) { closePosition(bot, "1h未达标", 'profit'); return; }
                     if(hoursElapsed >= 6) { closePosition(bot, "6h强制结清", 'profit'); return; }
                 }
