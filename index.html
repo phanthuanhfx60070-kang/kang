@@ -15,14 +15,12 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=VT323&display=swap" rel="stylesheet">
 
-    <!-- 📊 Google Analytics (谷歌分析) 已配置 -->
+    <!-- 📊 Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-NXKXXB84W5"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
-      // 🔴 这里填的是衡量 ID (Measurement ID)
       gtag('config', 'G-NXKXXB84W5'); 
     </script>
     
@@ -48,7 +46,7 @@
             grid-template-columns: 1fr; 
             gap: 20px; 
             width: 100%; 
-            max-width: 800px; /* 稍微宽一点容纳两列 */
+            max-width: 800px; 
             z-index: 50; 
             margin-top: 2rem;
         }
@@ -73,7 +71,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 200px;
+            min-height: 220px; /* 稍微增加高度以容纳双按钮 */
         }
         .gateway-card:hover { transform: translateY(-5px) scale(1.02); }
         .gateway-card:active { transform: scale(0.98); }
@@ -95,11 +93,10 @@
         .theme-data .icon { color: #6366f1; text-shadow: 0 0 15px rgba(99, 102, 241, 0.4); }
         .theme-data .bar { background-color: #6366f1; }
 
-        /* 🟧 AUTO 哨兵 (橙红色) */
-        .theme-auto:hover { box-shadow: 0 0 30px rgba(249, 115, 22, 0.3); border-color: #f97316; background: rgba(249, 115, 22, 0.05); }
+        /* 🟧 AUTO 哨兵 (橙红色) - 这里的hover只保留边框发光，因为内部有按钮 */
+        .theme-auto:hover { box-shadow: 0 0 30px rgba(249, 115, 22, 0.3); border-color: #f97316; background: rgba(249, 115, 22, 0.02); }
         .theme-auto .icon { color: #f97316; text-shadow: 0 0 15px rgba(249, 115, 22, 0.4); }
-        .theme-auto .bar { background-color: #f97316; }
-
+        
         /* 动画 */
         .fade-in { animation: fadeIn 0.8s ease-out forwards; opacity: 0; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -146,13 +143,27 @@
             <p class="text-xs text-gray-400 font-mono">BNS DATA • SMART ANALYSIS</p>
         </a>
 
-        <!-- 4. 哨兵量化系统 -->
-        <a href="https://www.kang.meme/auto" class="gateway-card theme-auto">
+        <!-- 4. 哨兵量化系统 (双系统版) -->
+        <!-- 注意：这个div没有href，链接在里面的按钮上 -->
+        <div class="gateway-card theme-auto cursor-default">
             <div class="icon"><i class="fas fa-robot"></i></div>
-            <h2 class="text-xl font-bold text-white mb-2">哨兵量化系统</h2>
-            <div class="bar"></div>
-            <p class="text-xs text-gray-400 font-mono">SENTINEL QUANT • AUTO TRADE</p>
-        </a>
+            <h2 class="text-xl font-bold text-white mb-4">哨兵量化系统</h2>
+            
+            <!-- 分割为左右两个按钮 -->
+            <div class="w-full grid grid-cols-2 gap-3 mt-auto">
+                <!-- A. 策略系统 -->
+                <a href="https://www.kang.meme/auto" class="flex flex-col items-center justify-center py-3 px-2 rounded-xl border border-orange-500/30 bg-orange-500/10 hover:bg-orange-500 hover:text-black transition-all duration-300 text-orange-400 hover:shadow-[0_0_20px_rgba(249,115,22,0.5)]">
+                    <span class="text-xl mb-1"><i class="fas fa-chart-line"></i></span>
+                    <span class="text-xs font-bold tracking-wider">策略系统</span>
+                </a>
+                
+                <!-- B. 抓针系统 -->
+                <a href="https://www.kang.meme/auto2" class="flex flex-col items-center justify-center py-3 px-2 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-600 hover:text-white transition-all duration-300 text-red-400 hover:shadow-[0_0_20px_rgba(220,38,38,0.5)]">
+                    <span class="text-xl mb-1"><i class="fas fa-crosshairs"></i></span>
+                    <span class="text-xs font-bold tracking-wider">抓针系统</span>
+                </a>
+            </div>
+        </div>
 
     </div>
 
@@ -163,7 +174,7 @@
             SECURE GATEWAY // ENCRYPTED
         </div>
 
-        <!-- 📊 方案二：可视化计数器 (不蒜子) -->
+        <!-- 可视化计数器 -->
         <div class="text-gray-500 text-[9px] font-mono flex items-center justify-center gap-4 bg-black/20 backdrop-blur-sm py-1 px-3 rounded-full inline-block mx-auto border border-gray-800/50">
             <span id="busuanzi_container_site_pv" style="display:none">
                 <i class="fas fa-eye text-blue-500/70 mr-1"></i>
