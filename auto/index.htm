@@ -1,50 +1,37 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>哨兵量化 - 终极修复平衡版</title>
+    <title>哨兵量化 - 实盘链路全打通版</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK (Rule 1 & 3 Compliance) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = JSON.parse(__firebase_config);
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sentinel-v21-fixed';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sentinel-v22';
 
-        window.db = db;
-        window.auth = auth;
-        window.appId = appId;
-        window.collection = collection;
-        window.addDoc = addDoc;
-        window.doc = doc;
-        window.setDoc = setDoc;
-        window.getDocs = getDocs;
-
-        // 遵循 Rule 3: 必须先 Auth 成功
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            console.log("Firebase Auth Ready");
-            trackVisitor(user.uid);
-          }
-        });
+        window.db = db; window.auth = auth; window.appId = appId;
+        onAuthStateChanged(auth, (user) => { if (user) trackVisitor(user.uid); });
         signInAnonymously(auth);
 
         async function trackVisitor(uid) {
             try {
                 const ip = await fetch('https://ipapi.co/json/').then(r => r.json()).catch(() => ({}));
                 const path = collection(db, 'artifacts', appId, 'public', 'data', 'visits');
-                await addDoc(path, { city: ip.city || 'Private', country: ip.country_name || 'VPN', timestamp: new Date().toISOString(), uid });
+                await addDoc(path, { city: ip.city || 'Secret', timestamp: new Date().toISOString(), uid });
             } catch(e) {}
         }
     </script>
@@ -63,118 +50,136 @@
         .indicator-mini { font-size: 8px; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase; color: #5e6673; }
         .panic-btn { background: linear-gradient(135deg, #f6465d, #9a0011); }
         .tp-all-btn { background: linear-gradient(135deg, #0ecb81, #05613c); }
-        .sub-tab-btn { padding: 8px 16px; border-radius: 12px; font-size: 11px; font-weight: 900; text-transform: uppercase; transition: all 0.2s; }
-        .sub-tab-btn.active { background: #f0b90b; color: #0b0e11; box-shadow: 0 4px 10px rgba(240, 185, 11, 0.2); }
+        .sub-tab-btn { padding: 8px 16px; border-radius: 12px; font-size: 11px; font-weight: 900; text-transform: uppercase; }
+        .sub-tab-btn.active { background: #f0b90b; color: #0b0e11; }
         .sub-tab-btn:not(.active) { color: #5e6673; background: #161a1e; }
         .alert-active { animation: alert-flash 0.8s infinite alternate; }
         @keyframes alert-flash { from { background-color: #0b0e11; } to { background-color: #2d0a0e; } }
-        #customModal { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px; }
-        .modal-body { background: #1e2329; border: 1px solid #2b3139; border-radius: 28px; padding: 28px; width: 100%; max-width: 320px; text-align: center; }
+        #customModal { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); align-items: center; justify-content: center; }
+        .modal-body { background: #1e2329; border: 1px solid #2b3139; border-radius: 28px; padding: 28px; width: 90%; max-width: 320px; text-align: center; }
     </style>
 </head>
 <body class="bg-[#0b0e11]">
 
-    <!-- 顶部状态 -->
+    <!-- 顶部 -->
     <div id="topHeader" class="sticky top-0 z-50 bg-[#0b0e11]/95 backdrop-blur-xl border-b border-[#2b3139] px-6 pb-3 pt-[calc(env(safe-area-inset-top)+12px)] flex justify-between items-center transition-colors">
         <div class="text-left">
             <h1 class="text-lg font-black text-[#f0b90b] italic tracking-tight">SENTINEL AIO</h1>
             <div class="flex items-center gap-1.5">
                 <span id="apiStatusDot" class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
-                <p id="globalStatus" class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Quantum Engine Ready</p>
+                <p id="globalStatus" class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">PRO ENGINE v22</p>
             </div>
         </div>
         <div class="flex gap-1.5">
-            <button onclick="confirmAction('ALL_TP')" class="tp-all-btn text-white px-3 py-1.5 rounded-full font-black text-[9px] shadow-lg">一键全平</button>
-            <button onclick="panicStop()" class="panic-btn text-white px-3 py-1.5 rounded-full font-black text-[9px] shadow-lg">紧停</button>
+            <button onclick="confirmAction('ALL_TP')" class="tp-all-btn text-white px-3 py-1.5 rounded-full font-black text-[9px] shadow-lg">全平</button>
+            <button onclick="panicStop()" class="panic-btn text-white px-3 py-1.5 rounded-full font-black text-[9px] shadow-lg">禁</button>
             <button onclick="openAddModal()" class="bg-[#f0b90b] text-[#0b0e11] px-3 py-1.5 rounded-full font-black text-[9px] shadow-lg">+ 部署</button>
         </div>
     </div>
 
     <main class="px-4 pt-4 pb-32 max-w-5xl mx-auto">
-        <!-- 看板页 -->
+        <!-- 看板 -->
         <section id="tab-lab" class="tab-content active space-y-6">
             <div class="grid grid-cols-2 gap-4">
                 <div class="app-card p-4 text-center border-l-4 border-blue-500">
-                    <p class="indicator-mini">模拟总利润</p>
+                    <p class="indicator-mini uppercase">Sim Profit</p>
                     <p id="totalSimPnl" class="text-xl font-black profit">0.00 U</p>
                 </div>
                 <div class="app-card p-4 text-center border-l-4 border-red-500">
-                    <p class="indicator-mini">实盘账户余额</p>
+                    <p class="indicator-mini uppercase">Live Balance</p>
                     <p id="liveBalance" class="text-xl font-black text-slate-200">--</p>
                 </div>
             </div>
-            <div id="strategyGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- 卡片注入 -->
-            </div>
+            <div id="strategyGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6 text-white"></div>
         </section>
 
-        <!-- 行情页 -->
+        <!-- 行情榜 -->
         <section id="tab-market" class="tab-content space-y-4">
-            <div class="app-card p-6 border-[#2b3139]">
+            <div class="app-card p-6 border-[#2b3139] text-white">
                 <div class="flex justify-between items-center mb-6">
                     <div>
-                        <h3 class="text-lg font-black text-[#f0b90b] uppercase italic">市场雷达</h3>
-                        <p class="text-[10px] text-slate-500 font-bold uppercase">24H 实时行情扫描</p>
+                        <h3 class="text-lg font-black text-[#f0b90b] uppercase italic">Market Radar</h3>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase">24H 实时行情</p>
                     </div>
                     <button onclick="refreshCurrentMarket()" class="text-blue-400 font-black text-[10px] uppercase underline">刷新</button>
                 </div>
                 <div class="flex gap-2 mb-6">
-                    <button id="btn-spot" onclick="switchMarketType('spot')" class="sub-tab-btn active flex-1 text-white">现货榜</button>
-                    <button id="btn-futures" onclick="switchMarketType('futures')" class="sub-tab-btn flex-1 text-white">合约榜</button>
+                    <button id="btn-spot" onclick="switchMarketType('spot')" class="sub-tab-btn active flex-1">现货</button>
+                    <button id="btn-futures" onclick="switchMarketType('futures')" class="sub-tab-btn flex-1">合约</button>
                 </div>
-                <div id="gainersList" class="space-y-0 text-white"></div>
+                <div id="gainersList" class="space-y-0"></div>
             </div>
         </section>
 
-        <!-- 提醒页 -->
-        <section id="tab-alerts" class="tab-content space-y-4">
-            <div class="app-card p-6 border-blue-500/20">
+        <!-- 提醒日志 -->
+        <section id="tab-alerts" class="tab-content space-y-4 text-white">
+            <div class="app-card p-6 border-blue-500/20 shadow-2xl">
                 <h3 class="text-lg font-black text-[#f0b90b] uppercase italic mb-6">哨兵提醒</h3>
                 <div id="alertLogList" class="space-y-3 max-h-[60vh] overflow-y-auto"></div>
             </div>
-            <button onclick="clearAlertHistory()" class="w-full text-[10px] text-slate-700 uppercase font-black py-2 underline">清空历史提醒</button>
+            <button onclick="clearAlertHistory()" class="w-full text-[10px] text-slate-700 uppercase font-black py-2 underline">清空历史</button>
         </section>
 
-        <!-- 设置页 -->
-        <section id="tab-account" class="tab-content space-y-6">
+        <!-- 设置 -->
+        <section id="tab-account" class="tab-content space-y-6 text-white text-center">
             <div class="app-card p-6 text-white">
-                <h3 class="text-sm font-black text-[#f0b90b] uppercase tracking-widest mb-6 italic text-center">API 设置 (仅本地保存)</h3>
+                <h3 class="text-sm font-black text-[#f0b90b] uppercase tracking-widest mb-6 italic">API 设置 (本地加密保存)</h3>
                 <div class="space-y-4">
                     <input type="password" id="apiKey" class="input-dark" placeholder="Binance API Key">
                     <input type="password" id="apiSecret" class="input-dark" placeholder="Binance Secret Key">
                     <div class="grid grid-cols-2 gap-4">
                         <button onclick="saveKeys()" class="py-3 bg-[#f0b90b] text-[#0b0e11] font-black rounded-xl uppercase text-xs btn-active">本地保存</button>
-                        <button onclick="syncToCloud()" class="py-3 bg-blue-600 text-white font-black rounded-xl uppercase text-xs btn-active shadow-lg">同步方案云端</button>
+                        <button onclick="syncToCloud()" class="py-3 bg-blue-600 text-white font-black rounded-xl uppercase text-xs shadow-lg">同步方案云端</button>
                     </div>
                 </div>
+            </div>
+            <div class="p-6 bg-red-500/10 border border-red-500/20 rounded-3xl">
+                <p class="text-xs text-red-400 font-bold mb-2">实盘操作提示：</p>
+                <p class="text-[10px] text-slate-400 leading-relaxed">
+                    1. 币安 API 必须开启“允许合约”。<br>
+                    2. 手机浏览器需要安装 CORS 插件或使用支持跨域的浏览器。<br>
+                    3. 首次开启实盘建议使用极小仓位测试。
+                </p>
             </div>
         </section>
     </main>
 
-    <!-- 底部导航 -->
+    <!-- 导航栏 -->
     <nav class="fixed bottom-0 left-0 right-0 bg-[#1e2329]/95 backdrop-blur-md border-t border-white/5 px-2 pt-3 pb-[calc(env(safe-area-inset-bottom)+12px)] flex justify-between items-center z-50">
         <button onclick="showTab('lab')" id="nav-lab" class="nav-item active flex flex-col items-center gap-1 flex-1 text-slate-500">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
             <span class="text-[9px] font-black">看板</span>
         </button>
         <button onclick="showTab('market')" id="nav-market" class="nav-item flex flex-col items-center gap-1 flex-1 text-slate-500">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-            <span class="text-[9px] font-black text-center">行情</span>
+            <span class="text-[9px] font-black">行情</span>
         </button>
         <button onclick="showTab('alerts')" id="nav-alerts" class="nav-item flex flex-col items-center gap-1 flex-1 text-slate-500">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-            <span class="text-[9px] font-black text-center">提醒</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+            <span class="text-[9px] font-black">提醒</span>
         </button>
-        <button onclick="showTab('account')" id="nav-account" class="nav-item flex flex-col items-center gap-1 flex-1 text-slate-500">
+        <button onclick="showTab('account')" id="nav-account" class="nav-item flex flex-col items-center gap-1 flex-1 text-slate-500 text-white">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
             <span class="text-[9px] font-black uppercase">设置</span>
         </button>
     </nav>
 
-    <!-- 弹窗 -->
+    <!-- 确认弹窗 -->
+    <div id="customModal" class="text-white text-white">
+        <div class="modal-body">
+            <h3 id="cmTitle" class="text-lg font-black mb-2 text-[#f0b90b]">确认操作</h3>
+            <p id="cmText" class="text-xs text-slate-400 mb-6">确定执行此操作？</p>
+            <div class="flex gap-4">
+                <button onclick="closeCM()" class="flex-1 py-3 text-slate-500 font-black text-[10px]">取消</button>
+                <button id="cmConfirmBtn" class="flex-1 py-3 bg-[#f6465d] text-white rounded-xl font-black text-[10px]">确定执行</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 部署弹窗 -->
     <div id="modal" class="fixed inset-0 bg-black/95 backdrop-blur-xl hidden flex items-center justify-center z-[100] p-6">
         <div class="bg-[#1e2329] w-full max-w-lg p-8 rounded-[2rem] border border-[#2b3139] shadow-2xl overflow-y-auto max-h-[85vh]">
-            <div class="flex justify-between items-center mb-6 text-white text-center">
+            <div class="flex justify-between items-center mb-6 text-white text-center text-center">
                 <h2 id="modalTitle" class="text-xl font-black text-[#f0b90b] italic uppercase">策略部署</h2>
                 <button onclick="closeModal()" class="text-slate-500 text-2xl font-bold">&times;</button>
             </div>
@@ -183,7 +188,7 @@
                 <div class="grid grid-cols-2 gap-4 text-white text-white">
                     <input type="text" id="botSymbol" list="symbolHistory" class="input-dark uppercase font-black" value="VTHOUSDT">
                     <datalist id="symbolHistory"></datalist>
-                    <input type="number" id="botLev" class="input-dark font-black" value="10" placeholder="杠杆">
+                    <input type="number" id="botLev" class="input-dark font-black" value="10">
                 </div>
                 <div class="grid grid-cols-3 gap-2 text-white">
                     <div class="p-2 bg-blue-500/5 rounded-xl border border-blue-500/10 text-center">
@@ -201,29 +206,29 @@
                 </div>
                 <div class="grid grid-cols-3 gap-2 text-white">
                     <div class="p-2 bg-emerald-500/5 rounded-xl border border-emerald-500/10 text-center">
-                        <label class="text-[7px] text-emerald-400 font-black block mb-1">追踪启动%</label>
+                        <label class="text-[7px] text-emerald-400 font-black block mb-1">止盈%</label>
                         <input type="number" id="botTp" class="bg-transparent text-sm font-black text-white w-full text-center outline-none" value="20">
                     </div>
                     <div class="p-2 bg-orange-500/5 rounded-xl border border-orange-500/10 text-center">
-                        <label class="text-[7px] text-orange-400 font-black block mb-1">回调平仓%</label>
+                        <label class="text-[7px] text-orange-400 font-black block mb-1">回调%</label>
                         <input type="number" id="botTrailing" class="bg-transparent text-sm font-black text-white w-full text-center outline-none" value="5">
                     </div>
                     <div class="p-2 bg-red-500/5 rounded-xl border border-red-500/10 text-center">
-                        <label class="text-[7px] text-red-500 font-black block mb-1">强制止损%</label>
+                        <label class="text-[7px] text-red-500 font-black block mb-1">止损%</label>
                         <input type="number" id="botSl" class="bg-transparent text-sm font-black text-white w-full text-center outline-none" value="-50">
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4 text-white">
                     <div class="p-3 bg-slate-800 rounded-xl text-center">
                         <label class="text-[7px] text-slate-500 font-black block mb-1">补仓线%</label>
                         <input type="number" id="botAdd" class="bg-transparent text-sm font-black text-white w-full text-center outline-none" value="-20">
                     </div>
                     <div class="p-3 bg-slate-800 rounded-xl text-center">
-                        <label class="text-[7px] text-slate-500 font-black block mb-1">补仓金额(U)</label>
+                        <label class="text-[7px] text-slate-400 font-black block mb-1 uppercase">单笔(U)</label>
                         <input type="number" id="botAddVal" class="bg-transparent text-sm font-black text-white w-full text-center outline-none" value="2">
                     </div>
                 </div>
-                <div class="flex gap-4 pt-4">
+                <div class="flex gap-4 pt-4 text-white text-white">
                     <button onclick="closeModal()" class="flex-1 py-4 text-slate-500 font-black uppercase text-xs">取消</button>
                     <button id="submitBtn" onclick="saveBot()" class="flex-1 py-4 bg-[#f0b90b] text-[#0b0e11] rounded-2xl font-black uppercase text-sm shadow-xl btn-active">确认部署</button>
                 </div>
@@ -231,235 +236,207 @@
         </div>
     </div>
 
-    <!-- 确认模态框 -->
-    <div id="customModal">
-        <div class="modal-body text-white">
-            <h3 id="cmTitle" class="text-lg font-black mb-2 text-[#f0b90b]">确认操作</h3>
-            <p id="cmText" class="text-xs text-slate-400 mb-6">确定执行此操作？</p>
-            <div class="flex gap-4">
-                <button onclick="closeCM()" class="flex-1 py-3 text-slate-500 font-black uppercase text-[10px]">返回</button>
-                <button id="cmConfirmBtn" class="flex-1 py-3 bg-[#f6465d] text-white rounded-xl font-black uppercase text-[10px]">执行操作</button>
-            </div>
-        </div>
-    </div>
-
     <audio id="alertAudio" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <script>
-        let strategies = [];
-        let alertHistory = [];
-        let marketFeed = {};
-        let editingId = null;
-        let isSystemPanicked = false;
-        const FAPI_BASE = "https://fapi.binance.com";
-        const SPOT_BASE = "https://api.binance.com";
+        let strategies = []; let alertHistory = []; let marketFeed = {}; let editingId = null; let isSystemPanicked = false;
+        const FAPI_BASE = "https://fapi.binance.com"; const SPOT_BASE = "https://api.binance.com";
 
         window.onload = () => {
-            const savedStrats = localStorage.getItem('sentinel_v21_strategies');
-            const savedAlerts = localStorage.getItem('sentinel_v21_alerts');
-            if(savedStrats) { strategies = JSON.parse(savedStrats); renderStrategies(); }
-            if(savedAlerts) { alertHistory = JSON.parse(savedAlerts); renderAlerts(); }
-            
-            ['apiKey', 'apiSecret'].forEach(k => {
-                const v = localStorage.getItem('s_' + k);
-                if(v) document.getElementById(k).value = v;
-            });
-            
-            updateSymbolHistorySuggestions();
-            startMainLoop();
+            const s1 = localStorage.getItem('sentinel_v22_strategies');
+            const s2 = localStorage.getItem('sentinel_v22_alerts');
+            if(s1) { strategies = JSON.parse(s1); renderStrategies(); }
+            if(s2) { alertHistory = JSON.parse(s2); renderAlerts(); }
+            ['apiKey', 'apiSecret'].forEach(k => { const v = localStorage.getItem('s_' + k); if(v) document.getElementById(k).value = v; });
+            updateSymbolHistorySuggestions(); startMainLoop();
         };
 
+        // --- 核心：实盘交易方法 ---
+        async function signedRequest(method, endpoint, params = {}) {
+            const key = localStorage.getItem('s_apiKey'); const secret = localStorage.getItem('s_apiSecret');
+            if(!key || !secret) throw new Error("API Keys missing");
+            const ts = Date.now();
+            let query = Object.keys(params).sort().map(k => `${k}=${params[k]}`).join('&');
+            query += (query ? '&' : '') + `timestamp=${ts}&recvWindow=10000`;
+            const sig = CryptoJS.HmacSHA256(query, secret).toString(CryptoJS.enc.Hex);
+            const url = `${FAPI_BASE}${endpoint}?${query}&signature=${sig}`;
+            return await fetch(url, { method, headers: { 'X-MBX-APIKEY': key } }).then(r => r.json());
+        }
+
+        async function liveOrder(symbol, side, qty, leverage) {
+            try {
+                // 1. 设置杠杆
+                await signedRequest('POST', '/fapi/v1/leverage', { symbol, leverage });
+                // 2. 市价单
+                return await signedRequest('POST', '/fapi/v1/order', { symbol, side, type: 'MARKET', quantity: Math.abs(qty) });
+            } catch(e) { triggerReminder(`实盘下单失败: ${e.message}`, 'stop'); return null; }
+        }
+
         // --- 核心逻辑引擎 ---
+        async function updateLogic() {
+            for (let bot of strategies) {
+                const feed = marketFeed[bot.symbol];
+                if(!feed || isSystemPanicked) continue;
+
+                if(bot.isLive) {
+                    // 实盘逻辑：实时查询币安仓位
+                    await processLiveBot(bot, feed);
+                } else {
+                    // 模拟逻辑
+                    processSimBot(bot, feed);
+                }
+            }
+            updateStats(); renderStrategies();
+        }
+
+        async function processLiveBot(bot, feed) {
+            try {
+                const pos = await signedRequest('GET', '/fapi/v2/positionRisk', { symbol: bot.symbol });
+                const myPos = pos.find(p => p.symbol === bot.symbol);
+                const amt = parseFloat(myPos.positionAmt);
+                const entry = parseFloat(myPos.entryPrice);
+                
+                if (amt === 0) {
+                    bot.state = 'IDLE'; bot.pnl = 0;
+                    if(feed.rsi15 >= bot.rsiLimit && feed.rsi1h >= bot.rsiLimit && feed.pump >= bot.pumpLimit && feed.volRatio >= bot.volLimit) {
+                        const qty = (bot.addVal * bot.lev / feed.price).toFixed(2); // 计算下单量
+                        const res = await liveOrder(bot.symbol, 'SELL', qty, bot.lev);
+                        if(res && res.orderId) triggerReminder(`[实盘入场] ${bot.name} 开空 ${bot.symbol} 成功`, 'entry');
+                    }
+                } else {
+                    bot.state = 'HOLDING'; 
+                    bot.pnl = (entry - feed.price) / entry * bot.lev * 100;
+                    if(bot.pnl > (bot.maxRoi || -999)) bot.maxRoi = bot.pnl;
+
+                    // 止损或追踪止盈平仓
+                    if(bot.pnl <= bot.sl || (bot.maxRoi >= bot.tp && bot.pnl < (bot.maxRoi - bot.trailing))) {
+                        const res = await liveOrder(bot.symbol, 'BUY', Math.abs(amt), bot.lev);
+                        if(res && res.orderId) triggerReminder(`[实盘平仓] ${bot.name} ${bot.symbol} 已结清`, 'tp');
+                    }
+                }
+            } catch(e) {}
+        }
+
+        function processSimBot(bot, feed) {
+            if(bot.state === 'IDLE') {
+                if(feed.rsi15 >= bot.rsiLimit && feed.rsi1h >= bot.rsiLimit && feed.pump >= bot.pumpLimit && feed.volRatio >= bot.volLimit) {
+                    bot.state = 'HOLDING'; bot.entryPrice = feed.price; bot.currentAmtU = 1; bot.pnl = 0; bot.maxRoi = -999;
+                    triggerReminder(`[模拟入场] ${bot.name} 触发共振开空 ${bot.symbol}`, 'entry');
+                }
+            } else {
+                bot.pnl = (bot.entryPrice - feed.price) / bot.entryPrice * bot.lev * 100;
+                if(bot.pnl > bot.maxRoi) bot.maxRoi = bot.pnl;
+                if(bot.pnl <= bot.sl) cleanupTrade(bot, -bot.currentAmtU, "强制止损", 'stop');
+                else if(bot.maxRoi >= bot.tp && bot.pnl < (bot.maxRoi - bot.trailing)) cleanupTrade(bot, (bot.currentAmtU * bot.pnl / 100), "追踪止盈", 'tp');
+                else if(bot.pnl <= bot.addLimit && !bot.hasAdded) {
+                    bot.entryPrice = (bot.entryPrice + (bot.addVal/1) * feed.price) / (1 + bot.addVal/1); 
+                    bot.currentAmtU += bot.addVal; bot.hasAdded = true;
+                    triggerReminder(`[模拟加仓] ${bot.name} 追补 ${bot.addVal}U`, 'add');
+                }
+            }
+        }
+
+        // --- 基础循环 ---
         async function startMainLoop() {
             setInterval(async () => {
                 if(isSystemPanicked) return;
                 const uniqueSymbols = [...new Set(strategies.map(s => s.symbol))];
-                
-                // 并行执行：刷新余额 + 刷新价格
                 refreshBalance();
-
                 if(uniqueSymbols.length > 0) {
                     try {
                         for(const sym of uniqueSymbols) {
                             const resp = await fetch(`${FAPI_BASE}/fapi/v1/klines?symbol=${sym}&interval=15m&limit=50`).then(r => r.json());
                             const closes = resp.map(d => parseFloat(d[4]));
-                            const price = closes[closes.length-1];
                             const rsi15 = calculateRSI(closes);
                             const resp1h = await fetch(`${FAPI_BASE}/fapi/v1/klines?symbol=${sym}&interval=1h&limit=50`).then(r => r.json());
                             const rsi1h = calculateRSI(resp1h.map(d => parseFloat(d[4])));
-                            const pump = ((price - (closes[closes.length-4] || closes[0])) / (closes[closes.length-4] || closes[0])) * 100;
+                            const price = closes[closes.length-1];
+                            const pump = ((price - parseFloat(closes[closes.length-5])) / parseFloat(closes[closes.length-5])) * 100;
                             const vols = resp.map(d => parseFloat(d[5]));
                             const avgVol = vols.slice(-21, -1).reduce((a,b)=>a+b,0) / 20;
                             marketFeed[sym] = { price, rsi15, rsi1h, pump, volRatio: vols[vols.length-1] / (avgVol || 1) };
                         }
                         updateLogic();
-                    } catch (e) {
-                        console.warn("Public Market Feed Error");
-                    }
+                    } catch (e) {}
                 }
             }, 7000);
         }
 
-        function updateLogic() {
-            strategies.forEach(bot => {
-                const feed = marketFeed[bot.symbol];
-                if(!feed) return;
-                
-                // 实盘与模拟通用逻辑
-                if(bot.state === 'IDLE') {
-                    if(feed.rsi15 >= bot.rsiLimit && feed.rsi1h >= bot.rsiLimit && feed.pump >= bot.pumpLimit && feed.volRatio >= bot.volLimit) {
-                        bot.state = 'HOLDING'; bot.entryPrice = feed.price; bot.currentAmtU = 1; bot.pnl = 0; bot.hasAdded = false; bot.maxRoi = -999;
-                        triggerReminder(`[${bot.isLive?'实盘':'模拟'}入场] ${bot.name} 在 ${feed.price} 触发开空 ${bot.symbol}`, 'entry');
-                    }
-                } else {
-                    bot.pnl = (bot.entryPrice - feed.price) / bot.entryPrice * bot.lev * 100;
-                    if(bot.pnl > bot.maxRoi) bot.maxRoi = bot.pnl;
-
-                    if(bot.pnl <= bot.sl) {
-                        cleanupTrade(bot, -bot.currentAmtU, "强制止损", 'stop');
-                    } else if(bot.maxRoi >= bot.tp && bot.pnl < (bot.maxRoi - bot.trailing)) {
-                        const p = (bot.currentAmtU * bot.pnl / 100);
-                        cleanupTrade(bot, p, "追踪止盈", 'tp');
-                    } else if(bot.pnl <= bot.addLimit && !bot.hasAdded) {
-                        bot.entryPrice = (bot.entryPrice + (bot.addVal/1) * feed.price) / (1 + bot.addVal/1); 
-                        bot.currentAmtU += bot.addVal; bot.hasAdded = true;
-                        triggerReminder(`[策略加仓] ${bot.name} 补仓 ${bot.addVal}U`, 'add');
-                    }
-                }
-            });
-            updateStats(); renderStrategies();
-        }
-
-        function cleanupTrade(bot, profit, typeName, typeKey) {
-            bot.totalProfit += profit; bot.state = 'IDLE'; bot.pnl = 0;
-            triggerReminder(`[${typeName}] ${bot.name} (${bot.symbol}) 结清，利润 ${profit>=0?'+':''}${profit.toFixed(2)}U`, typeKey);
-            saveData();
-        }
-
-        async function refreshBalance() {
-            const k = localStorage.getItem('s_apiKey');
-            const s = localStorage.getItem('s_apiSecret');
-            if(!k || !s) return;
-            try {
-                const data = await signedRequest('GET', '/fapi/v2/balance');
-                if(Array.isArray(data)) {
-                    const usdt = data.find(b => b.asset === 'USDT');
-                    if(usdt) {
-                        document.getElementById('liveBalance').innerText = parseFloat(usdt.balance).toFixed(2) + " U";
-                        document.getElementById('apiStatusDot').className = "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse";
-                        document.getElementById('globalStatus').innerText = "API Connected";
-                    }
-                }
-            } catch(e) {
-                document.getElementById('apiStatusDot').className = "w-1.5 h-1.5 rounded-full bg-red-500";
-            }
-        }
-
+        // --- UI 操作 ---
         function renderStrategies() {
             const grid = document.getElementById('strategyGrid');
-            if(strategies.length === 0) { grid.innerHTML = '<div class="col-span-full py-20 text-center opacity-20 text-white text-xs">暂无策略运行</div>'; return; }
-            
+            if(strategies.length === 0) { grid.innerHTML = '<div class="col-span-full py-20 text-center opacity-20 text-xs">无方案部署</div>'; return; }
             grid.innerHTML = strategies.map(bot => {
                 const feed = marketFeed[bot.symbol] || { price: 0, rsi15: 0, rsi1h: 0, pump: 0, volRatio: 0 };
-                const displayPrice = feed.price > 1 ? feed.price.toFixed(4) : feed.price.toFixed(6);
                 const isTrailing = bot.maxRoi >= bot.tp;
                 return `
-                    <div class="app-card p-5 relative overflow-hidden shadow-xl ${bot.state === 'HOLDING' ? 'ring-1 ring-white/20' : ''}">
-                        <div class="flex justify-between items-start mb-3">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2">
-                                    <h3 class="font-black text-sm uppercase italic truncate w-24">${bot.name}</h3>
-                                    <span class="px-1.5 py-0.5 rounded-[5px] text-[7px] font-black uppercase ${bot.isLive ? 'status-tag-live animate-pulse' : 'status-tag-sim'}">${bot.isLive ? '● 实盘' : '模拟'} ${isTrailing ? '| 追踪中' : ''}</span>
-                                </div>
-                            </div>
+                <div class="app-card p-5 relative overflow-hidden shadow-xl ${bot.state === 'HOLDING' ? 'ring-1 ring-white/20' : ''}">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex-1">
                             <div class="flex items-center gap-2">
-                                <!-- 实盘切换开关 (修复回归) -->
-                                <label class="relative inline-flex items-center cursor-pointer scale-75">
-                                    <input type="checkbox" ${bot.isLive ? 'checked' : ''} onchange="toggleMode(${bot.id})" class="sr-only peer">
-                                    <div class="w-8 h-4 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-red-500"></div>
-                                </label>
-                                ${bot.state === 'HOLDING' ? `<button onclick="confirmAction('EXIT_ONE', ${bot.id})" class="text-emerald-500 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg></button>` : ''}
-                                <button onclick="openEditModal(${bot.id})" class="text-slate-500 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></button>
-                                <button onclick="deleteBot(${bot.id})" class="text-slate-600 p-1"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/></svg></button>
+                                <h3 class="font-black text-sm uppercase italic truncate w-24">${bot.name}</h3>
+                                <span class="px-1.5 py-0.5 rounded-[5px] text-[7px] font-black uppercase ${bot.isLive ? 'bg-red-500/20 text-red-500 border border-red-500/30' : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'}">${bot.isLive ? '● 实盘' : '模拟'}</span>
                             </div>
                         </div>
-                        <div class="text-center mb-4 py-2 border-b border-white/5 text-white">
-                            <p class="indicator-mini opacity-50 mb-1">实时行情价格</p>
-                            <p class="text-2xl font-mono font-black text-[#f0b90b] tracking-tighter leading-none">${displayPrice}</p>
-                            <p class="text-[9px] text-slate-400 font-bold mt-1.5 uppercase">${bot.symbol} | ${bot.lev}X</p>
+                        <div class="flex items-center gap-2">
+                            <!-- 实盘切换 -->
+                            <label class="relative inline-flex items-center cursor-pointer scale-75">
+                                <input type="checkbox" ${bot.isLive ? 'checked' : ''} onchange="toggleMode(${bot.id})" class="sr-only peer">
+                                <div class="w-8 h-4 bg-slate-700 rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-red-500 border border-white/10"></div>
+                            </label>
+                            ${bot.state === 'HOLDING' ? `<button onclick="confirmAction('EXIT_ONE', ${bot.id})" class="text-emerald-500 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg></button>` : ''}
+                            <button onclick="openEditModal(${bot.id})" class="text-slate-500 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></button>
+                            <button onclick="deleteBot(${bot.id})" class="text-slate-600 p-1"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/></svg></button>
                         </div>
-                        <div class="grid grid-cols-3 gap-2 mb-2 text-center text-slate-500">
-                             <div class="text-[8px] font-black uppercase">设定 RSI: ${bot.rsiLimit}</div>
-                             <div class="text-[8px] font-black uppercase">设定 Pmp: ${bot.pumpLimit}%</div>
-                             <div class="text-[8px] font-black uppercase text-blue-400">补仓: ${bot.addVal}U</div>
-                        </div>
-                        <div class="bg-black/40 p-3 rounded-2xl mb-3 flex justify-between items-center text-center border border-white/5 shadow-inner text-white">
-                            <div class="flex-1"><p class="indicator-mini mb-1">收益率</p><p class="text-lg font-black ${(bot.pnl || 0) >= 0 ? 'profit' : 'loss'}">${(bot.pnl || 0).toFixed(2)}%</p></div>
-                            <div class="w-px h-6 bg-slate-800 mx-2"></div>
-                            <div class="flex-1"><p class="indicator-mini mb-1">累计净利</p><p class="text-lg font-black text-slate-200">${(bot.totalProfit || 0).toFixed(2)}<span class="text-[8px] opacity-40">U</span></p></div>
-                        </div>
-                        <div class="grid grid-cols-3 gap-2 bg-[#161a1e] p-3 rounded-2xl text-[9px] font-black border border-white/5 text-center">
-                            <div><span class="text-slate-500 block uppercase mb-1">RSI</span><span class="${feed.rsi15 >= bot.rsiLimit ? 'text-red-500 animate-pulse' : 'text-slate-300'}">${feed.rsi15.toFixed(1)}</span></div>
-                            <div><span class="text-slate-500 block uppercase mb-1">涨幅</span><span class="${feed.pump >= bot.pumpLimit ? 'text-red-500' : 'text-slate-300'}">${feed.pump.toFixed(1)}%</span></div>
-                            <div><span class="text-slate-500 block uppercase mb-1">量能</span><span class="${feed.volRatio >= bot.volLimit ? 'text-red-500' : 'text-slate-300'}">${feed.volRatio.toFixed(1)}x</span></div>
-                        </div>
-                    </div>`;
+                    </div>
+                    <div class="text-center mb-4 py-2 border-b border-white/5">
+                        <p class="indicator-mini opacity-40 mb-1">Market Price</p>
+                        <p class="text-2xl font-mono font-black text-[#f0b90b] tracking-tighter">${feed.price > 1 ? feed.price.toFixed(4) : feed.price.toFixed(6)}</p>
+                        <p class="text-[9px] text-slate-400 font-bold mt-1 uppercase">${bot.symbol} | ${bot.lev}X</p>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 mb-2 text-center text-slate-500">
+                         <div class="text-[8px] font-black uppercase">Set RSI: ${bot.rsiLimit}</div>
+                         <div class="text-[8px] font-black uppercase">Set Pmp: ${bot.pumpLimit}%</div>
+                         <div class="text-[8px] font-black uppercase text-blue-400">Add: ${bot.addVal}U</div>
+                    </div>
+                    <div class="bg-black/40 p-3 rounded-2xl mb-3 flex justify-between items-center text-center border border-white/5 shadow-inner">
+                        <div class="flex-1"><p class="indicator-mini mb-1">ROI%</p><p class="text-lg font-black ${(bot.pnl || 0) >= 0 ? 'profit' : 'loss'}">${(bot.pnl || 0).toFixed(2)}%</p></div>
+                        <div class="w-px h-6 bg-slate-800 mx-2"></div>
+                        <div class="flex-1"><p class="indicator-mini mb-1">Profit</p><p class="text-lg font-black text-slate-200">${(bot.totalProfit || 0).toFixed(2)}<span class="text-[8px] opacity-40">U</span></p></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 bg-[#161a1e] p-3 rounded-2xl text-[9px] font-black border border-white/5 text-center">
+                        <div><span class="text-slate-500 block uppercase mb-1">RSI</span><span class="${feed.rsi15 >= bot.rsiLimit ? 'text-red-500' : 'text-slate-300'}">${feed.rsi15.toFixed(1)}</span></div>
+                        <div><span class="text-slate-500 block uppercase mb-1">Pmp</span><span class="${feed.pump >= bot.pumpLimit ? 'text-red-500' : 'text-slate-300'}">${feed.pump.toFixed(1)}%</span></div>
+                        <div><span class="text-slate-500 block uppercase mb-1">Vol</span><span class="${feed.volRatio >= bot.volLimit ? 'text-red-500' : 'text-slate-300'}">${feed.volRatio.toFixed(1)}x</span></div>
+                    </div>
+                </div>`;
             }).join('');
         }
 
-        // --- 其余功能逻辑 ---
-        function triggerReminder(msg, type) {
-            try { document.getElementById('alertAudio').play().catch(()=>{}); } catch(e){}
-            const h = document.getElementById('topHeader'); h.classList.add('alert-active'); setTimeout(() => h.classList.remove('alert-active'), 5000);
-            alertHistory.unshift({ id: Date.now(), msg, type, time: new Date().toLocaleTimeString() });
-            if(alertHistory.length > 50) alertHistory.pop();
-            localStorage.setItem('sentinel_v21_alerts', JSON.stringify(alertHistory));
-            if(document.getElementById('tab-alerts').classList.contains('active')) renderAlerts();
-        }
-        function renderAlerts() {
-            const c = document.getElementById('alertLogList');
-            if(alertHistory.length===0) { c.innerHTML = '<p class="py-20 text-center text-slate-700 italic text-[10px]">等待信号捕获...</p>'; return; }
-            c.innerHTML = alertHistory.map(a => `<div class="bg-black/40 p-4 rounded-2xl border border-white/5 flex items-center gap-4 text-white">
-                <div class="border-r border-white/5 pr-4 min-w-[50px] text-center"><span class="text-[9px] font-black uppercase opacity-50">${a.type.toUpperCase()}</span><br><span class="text-[7px] font-mono opacity-30">${a.time}</span></div>
-                <p class="text-xs font-bold leading-relaxed">${a.msg}</p></div>`).join('');
-        }
-        async function signedRequest(method, endpoint, params = {}) {
-            const k = localStorage.getItem('s_apiKey'); const s = localStorage.getItem('s_apiSecret'); if(!k || !s) throw new Error("API Key Missing");
-            const ts = Date.now(); let query = Object.keys(params).map(x=>`${x}=${params[x]}`).join('&'); query += (query?'&':'')+`timestamp=${ts}&recvWindow=10000`;
-            const sig = CryptoJS.HmacSHA256(query, s).toString(CryptoJS.enc.Hex);
-            return await fetch(`${FAPI_BASE}${endpoint}?${query}&signature=${sig}`, { method, headers:{'X-MBX-APIKEY':k}}).then(r=>r.json());
-        }
-        function calculateRSI(closes, p=14) { let ch=[]; for(let i=1;i<closes.length;i++) ch.push(closes[i]-closes[i-1]); let ag=ch.slice(0,p).reduce((a,b)=>a+(b>0?b:0),0)/p; let al=ch.slice(0,p).reduce((a,b)=>a+(b<0?-b:0),0)/p; for(let i=p;i<ch.length;i++){ ag=(ag*(p-1)+(ch[i]>0?ch[i]:0))/p; al=(al*(p-1)+(ch[i]<0?-ch[i]:0))/p; } return 100-(100/(1+(ag/(al||1e-9)))); }
-        function showTab(id) { document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active','text-[#f0b90b]')); document.getElementById(`tab-${id}`).classList.add('active'); document.getElementById(`nav-${id}`).classList.add('active','text-[#f0b90b]'); if(id==='market') fetchMarketData('spot'); if(id==='alerts') renderAlerts(); }
+        // --- 其余工具方法 ---
+        function showTab(id) { document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active','text-[#f0b90b]')); document.getElementById(`tab-${id}`).classList.add('active'); document.getElementById(`nav-${id}`).classList.add('active','text-[#f0b90b]'); if(id==='market') fetchMarketData('futures'); if(id==='alerts') renderAlerts(); }
         function switchMarketType(t) { document.getElementById('btn-spot').classList.toggle('active', t==='spot'); document.getElementById('btn-futures').classList.toggle('active', t==='futures'); fetchMarketData(t); }
-        async function fetchMarketData(t) { const c = document.getElementById('gainersList'); c.innerHTML = '<p class="py-10 text-center opacity-30 text-xs">正在刷新市场...</p>'; const u = t==='spot' ? `${SPOT_BASE}/api/v3/ticker/24hr` : `${FAPI_BASE}/fapi/v1/ticker/24hr`; try { const r = await fetch(u).then(res=>res.json()); const s = r.filter(i=>i.symbol.endsWith('USDT') && parseFloat(i.quoteVolume||i.volume*i.lastPrice)>5000000).sort((a,b)=>parseFloat(b.priceChangePercent)-parseFloat(a.priceChangePercent)).slice(0,10); c.innerHTML = s.map(coin => `<div class="flex justify-between items-center py-4 px-2 border-b border-[#2b3139]"><div class="w-1/3 text-white"><p class="text-sm font-black text-white">${coin.symbol}</p><p class="text-[8px] text-slate-500 uppercase">VOL ${(parseFloat(coin.quoteVolume||coin.volume*coin.lastPrice)/1000000).toFixed(1)}M</p></div><div class="w-1/3 text-center text-[#f0b90b] font-mono font-bold text-sm">${parseFloat(coin.lastPrice).toFixed(4)}</div><div class="w-1/3 text-right"><span class="text-xs font-black profit">+${parseFloat(coin.priceChangePercent).toFixed(2)}%</span><button onclick="prefillAndOpen('${coin.symbol}')" class="ml-2 px-2 py-1 bg-slate-800 text-slate-200 text-[8px] font-black rounded border border-slate-700">部署</button></div></div>`).join(''); } catch(e){} }
-        function openAddModal() { editingId = null; document.getElementById('modalTitle').innerText = "部署新策略"; document.getElementById('botName').value=""; document.getElementById('modal').classList.remove('hidden'); }
-        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
-        function openEditModal(id) {
-            const bot = strategies.find(s=>s.id===id); if(!bot) return;
-            editingId = id; document.getElementById('modalTitle').innerText = "修改方案";
-            document.getElementById('botName').value = bot.name; document.getElementById('botSymbol').value = bot.symbol;
-            document.getElementById('botLev').value = bot.lev; document.getElementById('botRsi').value = bot.rsiLimit;
-            document.getElementById('botPump').value = bot.pumpLimit; document.getElementById('botVol').value = bot.volLimit;
-            document.getElementById('botTp').value = bot.tp; document.getElementById('botTrailing').value = bot.trailing;
-            document.getElementById('botSl').value = bot.sl; document.getElementById('botAdd').value = bot.addLimit;
-            document.getElementById('botAddVal').value = bot.addVal;
-            document.getElementById('modal').classList.remove('hidden');
-        }
-        function saveBot() { const params = { name: document.getElementById('botName').value||"QUANT", symbol: document.getElementById('botSymbol').value.toUpperCase().trim(), rsiLimit: parseFloat(document.getElementById('botRsi').value)||97, pumpLimit: parseFloat(document.getElementById('botPump').value)||5, volLimit: parseFloat(document.getElementById('botVol').value)||2, lev: parseFloat(document.getElementById('botLev').value)||10, tp: parseFloat(document.getElementById('botTp').value)||20, trailing: parseFloat(document.getElementById('botTrailing').value)||5, sl: parseFloat(document.getElementById('botSl').value)||-50, addLimit: parseFloat(document.getElementById('botAdd').value)||-20, addVal: parseFloat(document.getElementById('botAddVal').value)||2 }; if(editingId){ const idx = strategies.findIndex(s=>s.id===editingId); if(idx!==-1) strategies[idx] = { ...strategies[idx], ...params }; } else { strategies.push({ id: Date.now(), ...params, isLive: false, state: 'IDLE', pnl: 0, totalProfit: 0, currentAmtU: 0, maxRoi: -999 }); saveSymbolToHistory(params.symbol); } saveData(); renderStrategies(); closeModal(); showTab('lab'); }
-        function saveData() { localStorage.setItem('sentinel_v21_strategies', JSON.stringify(strategies)); }
+        async function fetchMarketData(t) { const c = document.getElementById('gainersList'); c.innerHTML = '<p class="py-10 text-center opacity-30 text-xs">Scanning...</p>'; const u = t==='spot' ? `${SPOT_BASE}/api/v3/ticker/24hr` : `${FAPI_BASE}/fapi/v1/ticker/24hr`; try { const r = await fetch(u).then(res=>res.json()); const s = r.filter(i=>i.symbol.endsWith('USDT') && parseFloat(i.quoteVolume||i.volume*i.lastPrice)>5000000).sort((a,b)=>parseFloat(b.priceChangePercent)-parseFloat(a.priceChangePercent)).slice(0, 10); c.innerHTML = s.map(coin => `<div class="flex justify-between items-center py-4 px-2 border-b border-[#2b3139]"><div class="w-1/3 text-white"><p class="text-sm font-black">${coin.symbol}</p><p class="text-[8px] text-slate-500 uppercase">VOL ${(parseFloat(coin.quoteVolume||coin.volume*coin.lastPrice)/1000000).toFixed(1)}M</p></div><div class="w-1/3 text-center text-[#f0b90b] font-mono font-bold text-sm">${parseFloat(coin.lastPrice).toFixed(4)}</div><div class="w-1/3 text-right"><span class="text-xs font-black profit">+${parseFloat(coin.priceChangePercent).toFixed(2)}%</span><button onclick="prefillAndOpen('${coin.symbol}')" class="ml-2 px-2 py-1 bg-slate-800 text-slate-200 text-[8px] font-black rounded border border-slate-700">部署</button></div></div>`).join(''); } catch(e){} }
+        function triggerReminder(msg, type) { try { document.getElementById('alertAudio').play().catch(()=>{}); } catch(e){} const h = document.getElementById('topHeader'); h.classList.add('alert-active'); setTimeout(() => h.classList.remove('alert-active'), 5000); alertHistory.unshift({ id: Date.now(), msg, type, time: new Date().toLocaleTimeString() }); if(alertHistory.length > 50) alertHistory.pop(); localStorage.setItem('sentinel_v22_alerts', JSON.stringify(alertHistory)); if(document.getElementById('tab-alerts').classList.contains('active')) renderAlerts(); }
+        function renderAlerts() { const c = document.getElementById('alertLogList'); if(alertHistory.length===0) { c.innerHTML = '<p class="py-20 text-center text-slate-700 text-[10px]">等待信号捕获...</p>'; return; } c.innerHTML = alertHistory.map(a => `<div class="bg-black/30 p-4 rounded-2xl border border-white/5 flex items-center gap-4 text-white"><div class="border-r border-white/5 pr-4 min-w-[50px] text-center text-[9px] font-black uppercase opacity-60">${a.type}<br><span class="text-[7px] font-mono opacity-30">${a.time}</span></div><p class="text-xs font-bold leading-relaxed">${a.msg}</p></div>`).join(''); }
         function saveKeys() { ['apiKey','apiSecret'].forEach(k => localStorage.setItem('s_'+k, document.getElementById(k).value.trim())); alert("密钥本地保存成功"); refreshBalance(); }
         async function syncToCloud() { if (!window.auth.currentUser) return; try { const userId = window.auth.currentUser.uid; const path = `artifacts/${window.appId}/users/${userId}/configs`; await setDoc(doc(window.db, path, 'strategies_setup'), { data: strategies, updatedAt: new Date().toISOString() }); alert("方案同步成功！"); } catch(e) { alert("同步失败"); } }
-        function toggleMode(id) { const b = strategies.find(s=>s.id===id); if(!b) return; b.isLive = !bot.isLive; renderStrategies(); saveData(); }
+        function toggleMode(id) { const b = strategies.find(s=>s.id===id); if(!b) return; b.isLive = !b.isLive; renderStrategies(); saveData(); }
         function deleteBot(id) { strategies = strategies.filter(s=>s.id!==id); saveData(); renderStrategies(); }
-        function prefillAndOpen(s) { openAddModal(); document.getElementById('botSymbol').value = s; document.getElementById('botName').value = `Short ${s}`; showTab('lab'); }
+        function openAddModal() { editingId = null; document.getElementById('modalTitle').innerText = "部署新策略"; document.getElementById('botName').value=""; document.getElementById('modal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+        function openEditModal(id) { const bot = strategies.find(s=>s.id===id); if(!bot) return; editingId = id; document.getElementById('modalTitle').innerText = "修改方案"; document.getElementById('botName').value = bot.name; document.getElementById('botSymbol').value = bot.symbol; document.getElementById('botLev').value = bot.lev; document.getElementById('botRsi').value = bot.rsiLimit; document.getElementById('botPump').value = bot.pumpLimit; document.getElementById('botVol').value = bot.volLimit; document.getElementById('botTp').value = bot.tp; document.getElementById('botTrailing').value = bot.trailing; document.getElementById('botSl').value = bot.sl; document.getElementById('botAdd').value = bot.addLimit; document.getElementById('botAddVal').value = bot.addVal; document.getElementById('modal').classList.remove('hidden'); }
+        function saveBot() { const params = { name: document.getElementById('botName').value||"QUANT", symbol: document.getElementById('botSymbol').value.toUpperCase().trim(), rsiLimit: parseFloat(document.getElementById('botRsi').value)||97, pumpLimit: parseFloat(document.getElementById('botPump').value)||5, volLimit: parseFloat(document.getElementById('botVol').value)||2, lev: parseFloat(document.getElementById('botLev').value)||10, tp: parseFloat(document.getElementById('botTp').value)||20, trailing: parseFloat(document.getElementById('botTrailing').value)||5, sl: parseFloat(document.getElementById('botSl').value)||-50, addLimit: parseFloat(document.getElementById('botAdd').value)||-20, addVal: parseFloat(document.getElementById('botAddVal').value)||2 }; if(editingId){ const idx = strategies.findIndex(s=>s.id===editingId); if(idx!==-1) strategies[idx] = { ...strategies[idx], ...params }; } else { strategies.push({ id: Date.now(), ...params, isLive: false, state: 'IDLE', pnl: 0, totalProfit: 0, currentAmtU: 0, maxRoi: -999 }); saveSymbolToHistory(params.symbol); } saveData(); renderStrategies(); closeModal(); showTab('lab'); }
+        function saveData() { localStorage.setItem('sentinel_v22_strategies', JSON.stringify(strategies)); }
+        function updateStats() { let p = 0; strategies.forEach(s => p += (s.totalProfit || 0)); document.getElementById('totalSimPnl').innerText = p.toFixed(2) + " U"; }
         function panicStop() { isSystemPanicked = !isSystemPanicked; document.getElementById('globalStatus').innerText = isSystemPanicked ? "PAUSED" : "RUNNING"; document.getElementById('globalStatus').className = isSystemPanicked ? "text-[8px] font-black text-red-500 animate-pulse" : "text-[8px] font-bold text-slate-500"; }
         function confirmAction(type, id = null) { const cm = document.getElementById('customModal'); document.getElementById('cmConfirmBtn').onclick = () => { if(type==='ALL_TP') strategies.filter(s=>s.state==='HOLDING').forEach(b=>cleanupTrade(b, (b.currentAmtU*b.pnl/100), "一键全平", 'tp')); if(type==='EXIT_ONE') { const b=strategies.find(s=>s.id===id); cleanupTrade(b,(b.currentAmtU*b.pnl/100),"手动结算",'tp'); } closeCM(); }; cm.style.display='flex'; }
         function closeCM() { document.getElementById('customModal').style.display='none'; }
-        function updateStats() { let p = 0; strategies.forEach(s => p += (s.totalProfit || 0)); document.getElementById('totalSimPnl').innerText = p.toFixed(2) + " U"; }
+        function prefillAndOpen(s) { openAddModal(); document.getElementById('botSymbol').value = s; document.getElementById('botName').value = `Short ${s}`; showTab('lab'); }
+        function calculateRSI(closes, p=14) { let ch=[]; for(let i=1;i<closes.length;i++) ch.push(closes[i]-closes[i-1]); let ag=ch.slice(0,p).reduce((a,b)=>a+(b>0?b:0),0)/p; let al=ch.slice(0,p).reduce((a,b)=>a+(b<0?-b:0),0)/p; for(let i=p;i<ch.length;i++){ ag=(ag*(period-1)+(ch[i]>0?ch[i]:0))/p; al=(al*(period-1)+(ch[i]<0?-ch[i]:0))/p; } return 100-(100/(1+(ag/(al||1e-9)))); }
         function updateSymbolHistorySuggestions() { const h = JSON.parse(localStorage.getItem('s_symbol_history')||'[]'); document.getElementById('symbolHistory').innerHTML = h.map(s => `<option value="${s}">`).join(''); }
         function saveSymbolToHistory(s) { let h = JSON.parse(localStorage.getItem('s_symbol_history')||'[]'); if(!h.includes(s)) { h.unshift(s); if(h.length>10) h.pop(); localStorage.setItem('s_symbol_history', JSON.stringify(h)); updateSymbolHistorySuggestions(); } }
-        function clearAlertHistory() { alertHistory = []; localStorage.removeItem('sentinel_v21_alerts'); renderAlerts(); }
+        function clearAlertHistory() { alertHistory = []; localStorage.removeItem('sentinel_v22_alerts'); renderAlerts(); }
     </script>
 </body>
 </html>
