@@ -65,7 +65,7 @@
 <body class="bg-[#0b0e11]">
 
     <!-- 顶部状态栏 -->
-    <div id="topHeader" class="sticky top-0 z-50 bg-[#0b0e11]/95 backdrop-blur-xl border-b border-[#2b3139] px-4 pb-3 pt-[calc(env(safe-area-inset-top)+12px)] flex justify-between items-center transition-colors text-white">
+    <div id="topHeader" class="sticky top-0 z-50 bg-[#0b0e11]/95 backdrop-blur-xl border-b border-[#2b3139] px-4 pb-3 pt-[calc(env(safe-area-inset-top)+12px)] flex justify-between items-center transition-colors text-white text-center">
         <div class="text-left">
             <h1 class="text-lg font-black text-[#f0b90b] italic tracking-tight uppercase">Sentinel v28</h1>
             <div class="flex items-center gap-1.5">
@@ -73,8 +73,8 @@
                 <p id="globalStatus" class="text-[8px] font-bold text-slate-500 uppercase tracking-widest text-white tracking-tighter">Syncing Symbols...</p>
             </div>
         </div>
-        <div class="flex gap-1.5">
-            <button onclick="confirmAction('ALL_TP')" class="tp-all-btn text-white px-3 py-1.5 rounded-full font-black text-[9px] shadow-lg active:scale-95">一键全平</button>
+        <div class="flex gap-1.5 text-white">
+            <button onclick="confirmAction('ALL_TP')" class="tp-all-btn text-white px-3 py-1.5 rounded-full font-black text-[9px] shadow-lg active:scale-95 text-white">一键全平</button>
             <button onclick="panicStop()" class="panic-btn text-white px-3 py-1.5 rounded-full font-black text-[9px] shadow-lg active:scale-95">停机</button>
             <button onclick="openAddModal()" class="bg-[#f0b90b] text-[#0b0e11] px-3 py-1.5 rounded-full font-black text-[9px] shadow-lg active:scale-95">+ 部署</button>
         </div>
@@ -84,62 +84,62 @@
         <!-- 1. 看板页 -->
         <section id="tab-lab" class="tab-content active space-y-6">
             <div class="grid grid-cols-2 gap-4">
-                <div class="app-card p-4 text-center border-l-4 border-blue-500 shadow-lg text-white">
+                <div class="app-card p-4 text-center border-l-4 border-blue-500 shadow-lg text-white text-white text-white">
                     <p class="indicator-mini">模拟累计利润</p>
-                    <p id="totalSimPnl" class="text-xl font-black profit">0.00 U</p>
+                    <p id="totalSimPnl" class="text-xl font-black profit text-white text-white">0.00 U</p>
                 </div>
-                <div class="app-card p-4 text-center border-l-4 border-emerald-500 shadow-lg text-white">
+                <div class="app-card p-4 text-center border-l-4 border-emerald-500 shadow-lg text-white text-white text-white">
                     <p class="indicator-mini uppercase">Live Balance</p>
-                    <p id="liveBalance" class="text-xl font-black text-slate-200">--</p>
+                    <p id="liveBalance" class="text-xl font-black text-slate-200 text-white text-white">--</p>
                 </div>
             </div>
-            <div id="strategyGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div id="strategyGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6 text-white text-white">
                 <!-- 方案卡片自动注入 -->
             </div>
         </section>
 
         <!-- 2. 行情页 -->
-        <section id="tab-market" class="tab-content space-y-4 text-white">
+        <section id="tab-market" class="tab-content space-y-4 text-white text-white text-white">
             <div class="app-card p-6 border-[#2b3139]">
                 <div class="flex justify-between items-center mb-6">
                     <div>
                         <h3 class="text-lg font-black text-[#f0b90b] uppercase italic tracking-tighter">Market Radar</h3>
                         <p class="text-[10px] text-slate-500 font-bold uppercase">24H 实时行情扫描</p>
                     </div>
-                    <button onclick="refreshCurrentMarket()" class="text-blue-400 font-black text-[10px] uppercase underline">刷新</button>
+                    <button onclick="refreshCurrentMarket()" class="text-blue-400 font-black text-[10px] uppercase underline text-white text-white text-white">刷新</button>
                 </div>
-                <div class="flex gap-2 mb-6 text-white text-white">
-                    <button id="btn-spot" onclick="switchMarketType('spot')" class="sub-tab-btn active flex-1">现货</button>
-                    <button id="btn-futures" onclick="switchMarketType('futures')" class="sub-tab-btn flex-1">合约</button>
+                <div class="flex gap-2 mb-6 text-white text-white text-white text-white">
+                    <button id="btn-spot" onclick="switchMarketType('spot')" class="sub-tab-btn active flex-1 text-white text-white text-white text-white">现货</button>
+                    <button id="btn-futures" onclick="switchMarketType('futures')" class="sub-tab-btn flex-1 text-white text-white text-white text-white">合约</button>
                 </div>
-                <div id="gainersList" class="space-y-0 text-white text-white"></div>
+                <div id="gainersList" class="space-y-0 text-white text-white text-white text-white text-white"></div>
             </div>
         </section>
 
         <!-- 3. 提醒页 -->
-        <section id="tab-alerts" class="tab-content space-y-4 text-white">
+        <section id="tab-alerts" class="tab-content space-y-4 text-white text-white text-white">
             <div class="app-card p-6 border-blue-500/20 shadow-2xl">
-                <h3 class="text-lg font-black text-[#f0b90b] uppercase italic mb-6">哨兵动作日志</h3>
-                <div id="alertLogList" class="space-y-3 max-h-[60vh] overflow-y-auto pr-1"></div>
+                <h3 class="text-lg font-black text-[#f0b90b] uppercase italic mb-6 text-white text-white text-white">哨兵动作日志</h3>
+                <div id="alertLogList" class="space-y-3 max-h-[60vh] overflow-y-auto pr-1 text-white text-white"></div>
             </div>
-            <button onclick="clearAlertHistory()" class="w-full text-[10px] text-slate-700 uppercase font-black py-2 underline text-white">清空历史记录</button>
+            <button onclick="clearAlertHistory()" class="w-full text-[10px] text-slate-700 uppercase font-black py-2 underline text-white text-white text-white text-white">清空历史记录</button>
         </section>
 
         <!-- 4. 设置页 -->
-        <section id="tab-account" class="tab-content space-y-6 text-center text-white text-white">
-            <div class="app-card p-6 shadow-xl text-white">
-                <h3 class="text-sm font-black text-[#f0b90b] uppercase tracking-widest mb-6 italic text-center">API 设置 (本地存储)</h3>
-                <div class="space-y-4 text-white">
-                    <input type="password" id="apiKey" class="input-dark font-bold text-white text-white" placeholder="粘贴 Binance API Key">
-                    <input type="password" id="apiSecret" class="input-dark font-bold text-white text-white" placeholder="粘贴 Binance Secret Key">
-                    <div class="grid grid-cols-2 gap-4">
-                        <button onclick="saveKeys()" class="py-3 bg-[#f0b90b] text-[#0b0e11] font-black rounded-xl uppercase text-xs active:scale-95">本地保存</button>
-                        <button onclick="syncToCloud()" class="py-3 bg-blue-600 text-white font-black rounded-xl uppercase text-xs active:scale-95">方案云同步</button>
+        <section id="tab-account" class="tab-content space-y-6 text-center text-white text-white text-white text-white text-white">
+            <div class="app-card p-6 shadow-xl text-white text-white">
+                <h3 class="text-sm font-black text-[#f0b90b] uppercase tracking-widest mb-6 italic text-center text-white text-white">API 设置 (本地存储)</h3>
+                <div class="space-y-4 text-white text-white">
+                    <input type="password" id="apiKey" class="input-dark font-bold text-white text-white text-white text-white text-white" placeholder="粘贴 Binance API Key">
+                    <input type="password" id="apiSecret" class="input-dark font-bold text-white text-white text-white text-white text-white" placeholder="粘贴 Binance Secret Key">
+                    <div class="grid grid-cols-2 gap-4 text-white text-white">
+                        <button onclick="saveKeys()" class="py-3 bg-[#f0b90b] text-[#0b0e11] font-black rounded-xl uppercase text-xs active:scale-95 text-white text-white">本地保存</button>
+                        <button onclick="syncToCloud()" class="py-3 bg-blue-600 text-white font-black rounded-xl uppercase text-xs active:scale-95 text-white text-white">方案云同步</button>
                     </div>
                 </div>
             </div>
-            <div class="p-6 bg-red-500/10 border border-red-500/20 rounded-3xl text-[10px] text-slate-400">
-                <p class="font-bold text-red-400 mb-2 uppercase">精度与限速提示：</p>
+            <div class="p-6 bg-red-500/10 border border-red-500/20 rounded-3xl text-[10px] text-slate-400 text-white text-white">
+                <p class="font-bold text-red-400 mb-2 uppercase text-white text-white">精度与限速提示：</p>
                 1. 现在的下单系统已自动适配各币种小数位精度。<br>
                 2. 最小开仓额需 > 5U，否则币安会拒绝指令。<br>
                 3. 如果出现实盘失败，请检查 API 是否开启了“允许合约”。
@@ -161,7 +161,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
             <span>提醒</span>
         </button>
-        <button onclick="showTab('account')" id="nav-account" class="nav-item flex-1">
+        <button onclick="showTab('account')" id="nav-account" class="nav-item flex-1 text-white text-white">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
             <span>设置</span>
         </button>
@@ -169,68 +169,68 @@
 
     <!-- 配置弹窗 -->
     <div id="modal">
-        <div class="modal-body text-white">
+        <div class="modal-body text-white text-white text-white">
             <div class="flex justify-between items-center mb-8">
                 <h2 id="modalTitle" class="text-xl font-black text-[#f0b90b] italic uppercase">策略部署</h2>
                 <button onclick="closeModal()" class="text-slate-500 text-2xl font-bold">&times;</button>
             </div>
-            <div class="space-y-4">
-                <input type="text" id="botName" class="input-dark font-bold uppercase text-white" placeholder="方案名称 (ALPHA)">
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="text" id="botSymbol" class="input-dark uppercase font-black" value="VTHOUSDT">
-                    <input type="number" id="botLev" class="input-dark font-black" value="10">
+            <div class="space-y-4 text-white text-white">
+                <input type="text" id="botName" class="input-dark font-bold uppercase text-white text-white text-white" placeholder="方案名称 (ALPHA)">
+                <div class="grid grid-cols-2 gap-4 text-white text-white text-white">
+                    <input type="text" id="botSymbol" class="input-dark uppercase font-black text-white text-white text-white" value="VTHOUSDT">
+                    <input type="number" id="botLev" class="input-dark font-black text-white text-white text-white" value="10">
                 </div>
                 <div class="grid grid-cols-3 gap-2">
                     <div class="p-2 bg-blue-500/5 rounded-xl border border-blue-500/10 text-center">
                         <label class="text-[7px] text-blue-400 font-black block mb-1">RSI 线</label>
                         <input type="number" id="botRsi" class="bg-transparent text-sm font-black text-white w-full text-center outline-none" value="97">
                     </div>
-                    <div class="p-2 bg-purple-500/5 rounded-xl border border-purple-500/10 text-center text-white text-white">
+                    <div class="p-2 bg-purple-500/5 rounded-xl border border-purple-500/10 text-center text-white text-white text-white">
                         <label class="text-[7px] text-purple-400 font-black block mb-1 uppercase">涨幅%</label>
                         <input type="number" id="botPump" class="bg-transparent text-sm font-black text-white w-full text-center outline-none" value="5">
                     </div>
-                    <div class="p-2 bg-yellow-500/5 rounded-xl border border-yellow-500/10 text-center text-white">
-                        <label class="text-[7px] text-yellow-400 font-black block mb-1 text-white text-white">量能 X</label>
+                    <div class="p-2 bg-yellow-500/5 rounded-xl border border-yellow-500/10 text-center text-white text-white">
+                        <label class="text-[7px] text-yellow-400 font-black block mb-1 text-white text-white text-white">量能 X</label>
                         <input type="number" id="botVol" class="bg-transparent text-sm font-black text-white w-full text-center outline-none" value="2">
                     </div>
                 </div>
-                <div class="grid grid-cols-3 gap-2 text-white text-white">
-                    <div class="p-2 bg-emerald-500/5 rounded-xl border border-emerald-500/10 text-center text-white">
-                        <label class="text-[7px] text-emerald-400 font-black block mb-1 text-white text-white text-white">止盈%</label>
+                <div class="grid grid-cols-3 gap-2 text-white text-white text-white">
+                    <div class="p-2 bg-emerald-500/5 rounded-xl border border-emerald-500/10 text-center text-white text-white">
+                        <label class="text-[7px] text-emerald-400 font-black block mb-1 text-white text-white text-white text-white">止盈%</label>
                         <input type="number" id="botTp" class="bg-transparent text-sm font-black text-white w-full text-center outline-none font-bold" value="20">
                     </div>
-                    <div class="p-2 bg-orange-500/5 rounded-xl border border-orange-500/10 text-center text-white">
-                        <label class="text-[7px] text-orange-400 font-black block mb-1 text-white text-white text-white text-white">回调%</label>
+                    <div class="p-2 bg-orange-500/5 rounded-xl border border-orange-500/10 text-center text-white text-white">
+                        <label class="text-[7px] text-orange-400 font-black block mb-1 text-white text-white text-white text-white text-white">回调%</label>
                         <input type="number" id="botTrailing" class="bg-transparent text-sm font-black text-white w-full text-center outline-none font-bold" value="5">
                     </div>
-                    <div class="p-2 bg-red-500/5 rounded-xl border border-red-500/10 text-center text-white">
-                        <label class="text-[7px] text-red-500 font-black block mb-1 text-white text-white text-white text-white">止损%</label>
+                    <div class="p-2 bg-red-500/5 rounded-xl border border-red-500/10 text-center text-white text-white">
+                        <label class="text-[7px] text-red-500 font-black block mb-1 text-white text-white text-white text-white text-white">止损%</label>
                         <input type="number" id="botSl" class="bg-transparent text-sm font-black text-white w-full text-center outline-none font-bold" value="-50">
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="p-3 bg-slate-800 rounded-xl text-center text-white text-white text-white">
-                        <label class="text-[7px] text-slate-500 font-black block mb-1 text-white text-white text-white text-white text-white text-white">补仓线%</label>
-                        <input type="number" id="botAdd" class="bg-transparent text-sm font-black text-white w-full text-center outline-none font-bold" value="-20">
+                <div class="grid grid-cols-2 gap-4 text-white">
+                    <div class="p-3 bg-slate-800 rounded-xl text-center text-white text-white text-white text-white">
+                        <label class="text-[7px] text-slate-500 font-black block mb-1 text-white text-white text-white text-white text-white text-white text-white">补仓线%</label>
+                        <input type="number" id="botAdd" class="bg-transparent text-sm font-black text-white w-full text-center outline-none font-bold text-white" value="-20">
                     </div>
-                    <div class="p-3 bg-slate-800 rounded-xl text-center text-white">
-                        <label class="text-[7px] text-slate-500 font-black block mb-1 text-white text-white text-white text-white text-white">补仓(U)</label>
-                        <input type="number" id="botAddVal" class="bg-transparent text-sm font-black text-white w-full text-center outline-none font-bold" value="10">
+                    <div class="p-3 bg-slate-800 rounded-xl text-center text-white text-white">
+                        <label class="text-[7px] text-slate-500 font-black block mb-1 text-white text-white text-white text-white text-white text-white">补仓(U)</label>
+                        <input type="number" id="botAddVal" class="bg-transparent text-sm font-black text-white w-full text-center outline-none font-bold text-white text-white" value="1">
                     </div>
                 </div>
-                <button id="submitBtn" onclick="saveBot()" class="w-full py-4 bg-[#f0b90b] text-[#0b0e11] rounded-2xl font-black uppercase text-sm shadow-xl active:scale-95">启动该方案</button>
+                <button id="submitBtn" onclick="saveBot()" class="w-full py-4 bg-[#f0b90b] text-[#0b0e11] rounded-2xl font-black uppercase text-sm shadow-xl active:scale-95 text-white">启动该方案</button>
             </div>
         </div>
     </div>
 
     <!-- 确认结清框 -->
     <div id="confirmBox">
-        <div class="modal-body text-white">
-            <h3 id="cmTitle" class="text-lg font-black mb-2 text-[#f0b90b]">确认执行</h3>
-            <p id="cmText" class="text-xs text-slate-400 mb-8">结清该实盘持仓吗？</p>
-            <div class="flex gap-4">
-                <button onclick="closeCM()" class="flex-1 py-4 text-slate-500 font-black text-[10px]">返回</button>
-                <button id="cmConfirmBtn" class="flex-1 py-4 bg-[#f6465d] text-white rounded-2xl font-black text-[10px]">确定执行</button>
+        <div class="modal-body text-white text-white">
+            <h3 id="cmTitle" class="text-lg font-black mb-2 text-[#f0b90b] text-white">确认执行</h3>
+            <p id="cmText" class="text-xs text-slate-400 mb-8 text-white text-white text-white">结清该实盘持仓吗？</p>
+            <div class="flex gap-4 text-white">
+                <button onclick="closeCM()" class="flex-1 py-4 text-slate-500 font-black text-[10px] text-white">返回</button>
+                <button id="cmConfirmBtn" class="flex-1 py-4 bg-[#f6465d] text-white rounded-2xl font-black text-[10px] text-white">确定执行</button>
             </div>
         </div>
     </div>
@@ -395,53 +395,53 @@
         function openAddModal() { editingId = null; document.getElementById('modal').style.display = 'block'; }
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
         function prefillAndOpen(s) { editingId = null; document.getElementById('botSymbol').value = s; showTab('lab'); setTimeout(() => { document.getElementById('modal').style.display = 'block'; }, 200); }
-        function saveBot() { const params = { name: document.getElementById('botName').value||"ALPHA", symbol: document.getElementById('botSymbol').value.toUpperCase().trim(), rsiLimit: parseFloat(document.getElementById('botRsi').value)||97, pumpLimit: parseFloat(document.getElementById('botPump').value)||5, volLimit: parseFloat(document.getElementById('botVol').value)||2, lev: parseFloat(document.getElementById('botLev').value)||10, tp: parseFloat(document.getElementById('botTp').value)||20, trailing: parseFloat(document.getElementById('botTrailing').value)||5, sl: parseFloat(document.getElementById('botSl').value)||-50, addLimit: parseFloat(document.getElementById('botAdd').value)||-20, addVal: parseFloat(document.getElementById('botAddVal').value)||10 }; if(editingId){ const idx = strategies.findIndex(s=>s.id===editingId); if(idx!==-1) strategies[idx] = { ...strategies[idx], ...params }; } else { strategies.push({ id: Date.now(), ...params, isLive: false, state: 'IDLE', pnl: 0, totalProfit: 0, currentAmtU: 0, maxRoi: -999 }); } saveData(); renderStrategies(); closeModal(); showTab('lab'); }
+        function saveBot() { const params = { name: document.getElementById('botName').value||"ALPHA", symbol: document.getElementById('botSymbol').value.toUpperCase().trim(), rsiLimit: parseFloat(document.getElementById('botRsi').value)||97, pumpLimit: parseFloat(document.getElementById('botPump').value)||5, volLimit: parseFloat(document.getElementById('botVol').value)||2, lev: parseFloat(document.getElementById('botLev').value)||10, tp: parseFloat(document.getElementById('botTp').value)||20, trailing: parseFloat(document.getElementById('botTrailing').value)||5, sl: parseFloat(document.getElementById('botSl').value)||-50, addLimit: parseFloat(document.getElementById('botAdd').value)||-20, addVal: parseFloat(document.getElementById('botAddVal').value)||1 }; if(editingId){ const idx = strategies.findIndex(s=>s.id===editingId); if(idx!==-1) strategies[idx] = { ...strategies[idx], ...params }; } else { strategies.push({ id: Date.now(), ...params, isLive: false, state: 'IDLE', pnl: 0, totalProfit: 0, currentAmtU: 0, maxRoi: -999 }); } saveData(); renderStrategies(); closeModal(); showTab('lab'); }
         function renderStrategies() {
             const grid = document.getElementById('strategyGrid');
-            if(!strategies.length) { grid.innerHTML = '<div class="col-span-full py-20 text-center opacity-20 text-white text-xs">NO DEPLOYMENT</div>'; return; }
+            if(!strategies.length) { grid.innerHTML = '<div class="col-span-full py-20 text-center opacity-20 text-white text-xs text-white">NO DEPLOYMENT</div>'; return; }
             grid.innerHTML = strategies.map(bot => {
                 const feed = marketFeed[bot.symbol] || { price: 0, rsi15: 0, pump: 0, volRatio: 0 };
                 return `<div class="app-card p-5 relative shadow-xl ${bot.state === 'HOLDING' ? 'ring-1 ring-white/20' : ''} text-white text-white text-white">
                     <div class="flex justify-between items-start mb-3">
-                        <div class="flex-1">
+                        <div class="flex-1 text-white">
                             <div class="flex items-center gap-2">
                                 <h3 class="font-black text-sm uppercase truncate w-24 text-white">${bot.name}</h3>
-                                <span class="px-1.5 py-0.5 rounded-[5px] text-[7px] font-black uppercase ${bot.isLive ? 'bg-red-500/20 text-red-500' : 'bg-blue-500/20 text-blue-400'}">${bot.isLive?'● 实盘':'模拟'}</span>
+                                <span class="px-1.5 py-0.5 rounded-[5px] text-[7px] font-black uppercase ${bot.isLive ? 'bg-red-500/20 text-red-500' : 'bg-blue-500/20 text-blue-400'} text-white">${bot.isLive?'● 实盘':'模拟'}</span>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 text-white">
                             <label class="relative inline-flex items-center cursor-pointer scale-75">
                                 <input type="checkbox" ${bot.isLive ? 'checked' : ''} onchange="toggleMode(${bot.id})" class="sr-only peer">
-                                <div class="w-8 h-4 bg-slate-700 rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-red-500"></div>
+                                <div class="w-8 h-4 bg-slate-700 rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-red-500 text-white"></div>
                             </label>
                             ${bot.state === 'HOLDING' ? `<button onclick="confirmAction('EXIT_ONE', ${bot.id})" class="text-emerald-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg></button>` : ''}
-                            <button onclick="openEditModal(${bot.id})" class="text-slate-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></button>
-                            <button onclick="deleteBot(${bot.id})" class="text-slate-600"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/></svg></button>
+                            <button onclick="openEditModal(${bot.id})" class="text-slate-500 text-white"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg></button>
+                            <button onclick="deleteBot(${bot.id})" class="text-slate-600 text-white"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/></svg></button>
                         </div>
                     </div>
-                    <div class="text-center mb-4 py-2 border-b border-white/5">
+                    <div class="text-center mb-4 py-2 border-b border-white/5 text-white">
                         <p class="text-2xl font-mono font-black text-[#f0b90b] leading-none text-white">${feed.price ? (feed.price>1?feed.price.toFixed(4):feed.price.toFixed(6)) : '--'}</p>
-                        <p class="text-[9px] text-slate-400 font-bold mt-1 uppercase">${bot.symbol} | ${bot.lev}X</p>
+                        <p class="text-[9px] text-slate-400 font-bold mt-1 uppercase text-white">${bot.symbol} | ${bot.lev}X</p>
                     </div>
-                    <div class="bg-black/40 p-3 rounded-2xl mb-3 flex justify-between items-center text-center border border-white/5">
-                        <div class="flex-1 text-white text-white text-white"><p class="indicator-mini mb-1">ROI</p><p class="text-lg font-black ${bot.pnl >= 0 ? 'profit' : 'loss'}">${bot.pnl.toFixed(2)}%</p></div>
-                        <div class="w-px h-6 bg-slate-800 mx-2"></div>
-                        <div class="flex-1 text-white"><p class="indicator-mini mb-1">Profit</p><p class="text-lg font-black text-slate-200">${bot.totalProfit.toFixed(2)}<span class="text-[8px] opacity-40 uppercase ml-0.5">U</span></p></div>
+                    <div class="bg-black/40 p-3 rounded-2xl mb-3 flex justify-between items-center text-center border border-white/5 text-white">
+                        <div class="flex-1 text-white text-white text-white text-white"><p class="indicator-mini mb-1">ROI</p><p class="text-lg font-black ${bot.pnl >= 0 ? 'profit' : 'loss'}">${bot.pnl.toFixed(2)}%</p></div>
+                        <div class="w-px h-6 bg-slate-800 mx-2 text-white"></div>
+                        <div class="flex-1 text-white text-white"><p class="indicator-mini mb-1 text-white">Profit</p><p class="text-lg font-black text-slate-200">${bot.totalProfit.toFixed(2)}<span class="text-[8px] opacity-40 uppercase ml-0.5">U</span></p></div>
                     </div>
                     <div class="grid grid-cols-3 gap-2 bg-[#161a1e] p-3 rounded-2xl text-[9px] font-black border border-white/5 text-center text-white">
-                        <div><span class="text-slate-500 block uppercase mb-0.5">RSI</span><span class="${feed.rsi15 >= bot.rsiLimit ? 'text-red-500' : 'text-slate-300'}">${feed.rsi15.toFixed(1)}</span></div>
-                        <div><span class="text-slate-500 block uppercase mb-0.5">Pump</span><span class="${feed.pump >= bot.pumpLimit ? 'text-red-500' : 'text-slate-300'}">${feed.pump.toFixed(1)}%</span></div>
-                        <div><span class="text-slate-500 block uppercase mb-0.5">Vol</span><span class="${feed.volRatio >= bot.volLimit ? 'text-red-500' : 'text-slate-300'}">${feed.volRatio.toFixed(1)}x</span></div>
+                        <div><span class="text-slate-500 block uppercase mb-0.5 text-white">RSI</span><span class="${feed.rsi15 >= bot.rsiLimit ? 'text-red-500' : 'text-slate-300'}">${feed.rsi15.toFixed(1)}</span></div>
+                        <div><span class="text-slate-500 block uppercase mb-0.5 text-white">Pump</span><span class="${feed.pump >= bot.pumpLimit ? 'text-red-500' : 'text-slate-300'}">${feed.pump.toFixed(1)}%</span></div>
+                        <div><span class="text-slate-500 block uppercase mb-0.5 text-white">Vol</span><span class="${feed.volRatio >= bot.volLimit ? 'text-red-500' : 'text-slate-300'}">${feed.volRatio.toFixed(1)}x</span></div>
                     </div>
                 </div>`;
             }).join('');
         }
 
         function showTab(id) { document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active')); document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active')); document.getElementById(`tab-${id}`).classList.add('active'); document.getElementById(`nav-${id}`).classList.add('active'); if(id==='market') fetchMarketData('spot'); if(id==='alerts') renderAlerts(); }
-        async function fetchMarketData(t) { const c = document.getElementById('gainersList'); c.innerHTML = '<p class="py-10 text-center opacity-30 text-xs">Fetching...</p>'; const u = t==='spot' ? `${SPOT_BASE}/api/v3/ticker/24hr` : `${FAPI_BASE}/fapi/v1/ticker/24hr`; try { const r = await fetch(u).then(res=>res.json()); const s = r.filter(i=>i.symbol.endsWith('USDT') && parseFloat(i.quoteVolume||i.volume*i.lastPrice)>5000000).sort((a,b)=>parseFloat(b.priceChangePercent)-parseFloat(a.priceChangePercent)).slice(0,10); c.innerHTML = s.map(coin => `<div class="flex justify-between items-center py-4 px-2 border-b border-[#2b3139] text-white"><div class="w-1/3 text-white"><p class="text-sm font-black text-white">${coin.symbol}</p><p class="text-[8px] text-slate-500 uppercase">VOL ${(parseFloat(coin.quoteVolume||coin.volume*coin.lastPrice)/1000000).toFixed(1)}M</p></div><div class="w-1/3 text-center text-[#f0b90b] font-mono font-bold text-sm text-center text-white text-white">${parseFloat(coin.lastPrice).toFixed(4)}</div><div class="w-1/3 text-right"><button onclick="prefillAndOpen('${coin.symbol}')" class="px-2 py-1 bg-slate-800 text-slate-200 text-[8px] font-black rounded border border-slate-700">＋ 部署</button></div></div>`).join(''); } catch(e) {} }
+        async function fetchMarketData(t) { const c = document.getElementById('gainersList'); c.innerHTML = '<p class="py-10 text-center opacity-30 text-xs text-white">Fetching...</p>'; const u = t==='spot' ? `${SPOT_BASE}/api/v3/ticker/24hr` : `${FAPI_BASE}/fapi/v1/ticker/24hr`; try { const r = await fetch(u).then(res=>res.json()); const s = r.filter(i=>i.symbol.endsWith('USDT') && parseFloat(i.quoteVolume||i.volume*i.lastPrice)>5000000).sort((a,b)=>parseFloat(b.priceChangePercent)-parseFloat(a.priceChangePercent)).slice(0,10); c.innerHTML = s.map(coin => `<div class="flex justify-between items-center py-4 px-2 border-b border-[#2b3139] text-white"><div class="w-1/3 text-white"><p class="text-sm font-black text-white">${coin.symbol}</p><p class="text-[8px] text-slate-500 uppercase text-white">VOL ${(parseFloat(coin.quoteVolume||coin.volume*coin.lastPrice)/1000000).toFixed(1)}M</p></div><div class="w-1/3 text-center text-[#f0b90b] font-mono font-bold text-sm text-center text-white text-white text-white">${parseFloat(coin.lastPrice).toFixed(4)}</div><div class="w-1/3 text-right"><button onclick="prefillAndOpen('${coin.symbol}')" class="px-2 py-1 bg-slate-800 text-slate-200 text-[8px] font-black rounded border border-slate-700 text-white">＋ 部署</button></div></div>`).join(''); } catch(e) {} }
         function saveData() { localStorage.setItem('sentinel_gh_v2_strats', JSON.stringify(strategies)); localStorage.setItem('sentinel_gh_v2_alerts', JSON.stringify(alertHistory)); }
         function triggerReminder(m, t) { try { document.getElementById('alertAudio').play().catch(()=>{}); } catch(e){} alertHistory.unshift({ id: Date.now(), msg: m, type: t, time: new Date().toLocaleTimeString() }); if(alertHistory.length>30) alertHistory.pop(); renderAlerts(); }
-        function renderAlerts() { const c = document.getElementById('alertLogList'); if(!alertHistory.length) { c.innerHTML = '<p class="py-20 text-center text-slate-700 italic uppercase text-white text-white">No Signals</p>'; return; } c.innerHTML = alertHistory.map(a => `<div class="bg-black/30 p-4 rounded-2xl border border-white/5 flex items-center gap-4 text-white text-white text-white"><div class="border-r border-white/5 pr-4 min-w-[50px] text-center text-[9px] font-black uppercase opacity-60 text-white text-white">${a.type}<br><span class="text-[7px] font-mono opacity-30">${a.time}</span></div><p class="text-xs font-bold leading-relaxed text-white text-white text-white">${a.msg}</p></div>`).join(''); }
+        function renderAlerts() { const c = document.getElementById('alertLogList'); if(!alertHistory.length) { c.innerHTML = '<p class="py-20 text-center text-slate-700 italic uppercase text-white text-white text-white">No Signals</p>'; return; } c.innerHTML = alertHistory.map(a => `<div class="bg-black/30 p-4 rounded-2xl border border-white/5 flex items-center gap-4 text-white text-white text-white"><div class="border-r border-white/5 pr-4 min-w-[50px] text-center text-[9px] font-black uppercase opacity-60 text-white text-white text-white">${a.type}<br><span class="text-[7px] font-mono opacity-30 text-white">${a.time}</span></div><p class="text-xs font-bold leading-relaxed text-white text-white text-white text-white">${a.msg}</p></div>`).join(''); }
         function saveKeys() { ['apiKey','apiSecret'].forEach(k => localStorage.setItem('s_'+k, document.getElementById(k).value.trim())); alert("Saved Locally"); refreshBalance(); }
         function panicStop() { isSystemPanicked = !isSystemPanicked; document.getElementById('globalStatus').innerText = isSystemPanicked ? "SYSTEM PAUSED" : "ACTIVE"; }
         function toggleMode(id) { const b = strategies.find(s=>s.id===id); if(!b) return; b.isLive = !b.isLive; renderStrategies(); saveData(); }
