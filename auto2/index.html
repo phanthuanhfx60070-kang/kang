@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>哨兵量化 - V39 实盘真实持仓版</title>
+    <title>哨兵量化 - V40 实盘盈亏修复版</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -28,7 +28,7 @@
                 const app = initializeApp(config);
                 window.auth = getAuth(app);
                 window.db = getFirestore(app);
-                window.appId = typeof __app_id !== 'undefined' ? __app_id : 'sentinel-v39';
+                window.appId = typeof __app_id !== 'undefined' ? __app_id : 'sentinel-v40';
 
                 try {
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -77,7 +77,7 @@
             <h1 class="text-lg font-black text-[#f0b90b] italic tracking-tighter uppercase truncate">Sentinel Pro</h1>
             <div class="flex items-center gap-1">
                 <span id="apiStatusDot" class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
-                <p id="globalStatus" class="text-[7px] font-bold text-slate-500 uppercase tracking-widest truncate">Live Mode Active</p>
+                <p id="globalStatus" class="text-[7px] font-bold text-slate-500 uppercase tracking-widest truncate">Live Portfolio Active</p>
             </div>
         </div>
         <div class="flex gap-2 flex-shrink-0">
@@ -95,22 +95,22 @@
                     <p id="totalSimPnl" class="text-xl font-black profit">0.00 U</p>
                 </div>
                 <div id="liveBalanceCard" class="app-card p-5 text-center border-t-2 border-slate-500">
-                    <p class="text-[10px] text-slate-500 font-black uppercase mb-1">可用可用余额</p>
+                    <p class="text-[10px] text-slate-500 font-black uppercase mb-1">可用钱包余额</p>
                     <p id="liveBalance" class="text-xl font-black text-slate-200">--</p>
                 </div>
             </div>
             <div id="strategyGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
         </section>
 
-        <!-- 实盘持仓 (直接显示币安真实仓位) -->
+        <!-- 实盘持仓 (修复 NaN 问题) -->
         <section id="tab-portfolio" class="tab-content space-y-4 text-left">
             <div class="app-card p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-black text-[#f0b90b] italic uppercase text-sm">币安实盘活跃持仓</h3>
-                    <button onclick="renderPortfolio()" class="text-[9px] text-slate-500 underline">刷新</button>
+                    <h3 class="text-lg font-black text-[#f0b90b] italic uppercase text-sm">币安合约真实持仓</h3>
+                    <button onclick="renderPortfolio()" class="text-[9px] text-slate-500 underline uppercase">同步</button>
                 </div>
                 <div id="portfolioList" class="divide-y divide-white/5 space-y-1">
-                    <p class="py-10 text-center opacity-30 text-[10px] uppercase font-black">正在读取账户数据...</p>
+                    <p class="py-10 text-center opacity-30 text-[10px] uppercase font-black">正在载入数据...</p>
                 </div>
             </div>
         </section>
@@ -316,13 +316,11 @@
 
         async function executeLiveTrade(bot, side, qty, reason, isClosing = false) {
             const key = localStorage.getItem('s_apiKey');
-            if (!key) return; // 没配API不执行
-            
+            if (!key) return;
             const safeQty = !isClosing ? (qty * 1.02) : qty; 
             const formattedQty = formatQuantity(bot.symbol, safeQty, !isClosing);
             const params = { symbol: bot.symbol, side: side, type: 'MARKET', quantity: formattedQty };
             if (isClosing) params.reduceOnly = "true";
-            
             const result = await signedRequest('POST', '/fapi/v1/order', params);
             if (result.orderId) {
                 triggerReminder(`[实盘成功] ${bot.symbol} ${reason}, 数量:${formattedQty}`, 'system');
@@ -349,7 +347,6 @@
                     } catch(e) {}
                 }
                 processAdvancedLogic();
-                // 仅持仓页激活时自动刷新
                 if(document.getElementById('tab-portfolio').classList.contains('active')) renderPortfolio();
             }, 3000); 
         }
@@ -439,7 +436,7 @@
             triggerReminder(`[离场] ${bot.symbol} ${reason}: ${finalProfit.toFixed(2)}U`, type);
         }
 
-        // --- 核心：实盘真实持仓获取与平仓逻辑 ---
+        // --- 核心：修复持仓页 NaN 问题 ---
         async function renderPortfolio() {
             const container = document.getElementById('portfolioList');
             const result = await signedRequest('GET', '/fapi/v2/positionRisk');
@@ -449,7 +446,6 @@
                 return;
             }
 
-            // 过滤出有真实持仓的币种 (positionAmt != 0)
             const activePositions = result.filter(pos => parseFloat(pos.positionAmt) !== 0);
 
             if (!activePositions.length) {
@@ -460,28 +456,36 @@
             container.innerHTML = activePositions.map(pos => {
                 const amt = parseFloat(pos.positionAmt);
                 const side = amt > 0 ? 'LONG' : 'SHORT';
-                const pnl = parseFloat(pos.unrealizedProfit).toFixed(2);
-                const pnlPct = (parseFloat(pos.unrealizedProfit) / (Math.abs(amt) * parseFloat(pos.entryPrice) / parseFloat(pos.leverage)) * 100).toFixed(2);
-                const symbol = pos.symbol;
+                const entryPrice = parseFloat(pos.entryPrice) || 0;
+                const markPrice = parseFloat(pos.markPrice) || 0;
+                const leverage = parseFloat(pos.leverage) || 1;
+                const upnl = parseFloat(pos.unrealizedProfit) || 0;
                 
+                // 稳健的收益率计算逻辑
+                let pnlPct = "0.00";
+                if (entryPrice > 0 && Math.abs(amt) > 0) {
+                    const margin = (Math.abs(amt) * entryPrice) / leverage;
+                    pnlPct = ((upnl / margin) * 100).toFixed(2);
+                }
+
                 return `
                 <div class="py-4 flex justify-between items-center text-left">
                     <div class="flex-shrink-0 w-24 text-left">
-                        <p class="font-black text-sm text-white uppercase truncate">${symbol}</p>
-                        <p class="text-[8px] font-bold uppercase ${side === 'LONG' ? 'profit' : 'loss'}">${side} · ${pos.leverage}X</p>
+                        <p class="font-black text-sm text-white uppercase truncate">${pos.symbol}</p>
+                        <p class="text-[8px] font-bold uppercase ${side === 'LONG' ? 'profit' : 'loss'}">${side} · ${leverage}X</p>
                     </div>
                     <div class="flex-1 px-2 text-left">
                         <div class="flex justify-between items-end mb-1 text-left">
-                            <span class="text-[8px] text-slate-500 uppercase font-black">uPnL</span>
-                            <span class="text-xs font-mono font-black ${pnl >= 0 ? 'profit' : 'loss'}">${pnl} U (${pnlPct}%)</span>
+                            <span class="text-[8px] text-slate-500 uppercase font-black">盈亏</span>
+                            <span class="text-xs font-mono font-black ${upnl >= 0 ? 'profit' : 'loss'}">${upnl.toFixed(2)} U (${pnlPct}%)</span>
                         </div>
                         <div class="flex justify-between items-end text-left">
-                            <span class="text-[8px] text-slate-500 uppercase font-black">Size</span>
+                            <span class="text-[8px] text-slate-500 uppercase font-black">持仓量</span>
                             <span class="text-[10px] font-mono font-bold text-white">${Math.abs(amt)}</span>
                         </div>
                     </div>
                     <div class="flex-shrink-0 ml-4">
-                        <button onclick="closeRealPosition('${symbol}', ${Math.abs(amt)}, '${side}')" class="bg-[#f6465d] text-white px-3 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg active:scale-90 transition-transform">强制平仓</button>
+                        <button onclick="closeRealPosition('${pos.symbol}', ${Math.abs(amt)}, '${side}')" class="bg-[#f6465d] text-white px-3 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg active:scale-90 transition-transform">强制平仓</button>
                     </div>
                 </div>`;
             }).join('');
@@ -491,10 +495,9 @@
             const closeSide = side === 'LONG' ? 'SELL' : 'BUY';
             const formattedQty = formatQuantity(symbol, qty, false);
             const params = { symbol: symbol, side: closeSide, type: 'MARKET', quantity: formattedQty, reduceOnly: "true" };
-            
             const result = await signedRequest('POST', '/fapi/v1/order', params);
             if (result.orderId) {
-                triggerReminder(`[实盘平仓成功] ${symbol} 手动强平完成`, 'system');
+                triggerReminder(`[实盘手动平仓] ${symbol} 已执行`, 'system');
                 renderPortfolio();
             } else {
                 triggerReminder(`[实盘平仓失败] ${symbol} ${result.msg}`, 'loss');
@@ -523,7 +526,7 @@
                     </div>
                     <div class="text-center mb-6 border-b border-white/5 pb-4">
                         <p class="text-3xl font-mono font-black text-white tracking-tighter">${feed.price ? feed.price.toFixed(feed.price < 1 ? 5 : 4) : '---'}</p>
-                        <p class="text-[8px] text-slate-500 uppercase font-black tracking-widest mt-1 italic text-center text-left">Market Price</p>
+                        <p class="text-[8px] text-slate-500 uppercase font-black tracking-widest mt-1 italic text-center text-left text-center">Market Price</p>
                     </div>
                     <div class="flex justify-between items-center mb-6 text-center text-left">
                         <div class="flex-1 text-left">
@@ -552,7 +555,7 @@
 
         async function fetchMarketData(type = 'spot') {
             const list = document.getElementById('gainersList'); if(!list) return;
-            list.innerHTML = '<p class="py-10 text-center text-[10px] opacity-30 font-black italic text-white text-left text-center">同步中...</p>';
+            list.innerHTML = '<p class="py-10 text-center text-[10px] opacity-30 font-black italic text-white text-left text-center">正在请求市场数据...</p>';
             const endpoint = type === 'spot' ? `${SPOT_BASE}/api/v3/ticker/24hr` : `${FAPI_BASE}/fapi/v1/ticker/24hr`;
             try {
                 const r = await fetch(endpoint).then(res => res.json());
@@ -609,7 +612,7 @@
         function closeModal() { document.getElementById('modal').classList.add('hidden'); }
         function saveKeys() { ['apiKey','apiSecret'].forEach(k => localStorage.setItem('s_'+k, document.getElementById(k).value.trim())); alert("密钥保存成功"); refreshBalance(); }
         function triggerReminder(msg, type) { try { document.getElementById('alertAudio').play().catch(()=>{}); } catch(e){} alertHistory.unshift({ msg, type, time: new Date().toLocaleTimeString() }); if(alertHistory.length > 50) alertHistory.pop(); localStorage.setItem('sentinel_v28_alerts', JSON.stringify(alertHistory)); renderAlerts(); }
-        function renderAlerts() { const c = document.getElementById('alertLogList'); if(!c) return; c.innerHTML = alertHistory.map(a => `<div class="bg-black/40 p-4 rounded-xl border border-white/5 text-[11px] text-white text-left"><span class="opacity-30 mr-2 font-mono">${a.time}</span> ${a.msg}</div>`).join(''); }
+        function renderAlerts() { const c = document.getElementById('alertLogList'); if(!c) return; c.innerHTML = alertHistory.map(a => `<div class="bg-black/40 p-4 rounded-xl border border-white/5 text-[11px] text-white text-left text-left"><span class="opacity-30 mr-2 font-mono">${a.time}</span> ${a.msg}</div>`).join(''); }
         function clearAlertHistory() { alertHistory = []; renderAlerts(); }
         function confirmAction(type) { document.getElementById('cmConfirmBtn').onclick = () => { if(type==='ALL_TP') strategies.filter(s=>s.state==='HOLDING').forEach(b=>closePosition(b, "手动清平", 'profit')); closeCM(); }; document.getElementById('customModal').style.display='flex'; }
         function closeCM() { document.getElementById('customModal').style.display='none'; }
