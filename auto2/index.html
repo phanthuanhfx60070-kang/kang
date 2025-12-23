@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>哨兵量化 - V35 实盘诊断增强版</title>
+    <title>哨兵量化 - V36 实盘精度与价值优化版</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -28,7 +28,7 @@
                 const app = initializeApp(config);
                 window.auth = getAuth(app);
                 window.db = getFirestore(app);
-                window.appId = typeof __app_id !== 'undefined' ? __app_id : 'sentinel-v35';
+                window.appId = typeof __app_id !== 'undefined' ? __app_id : 'sentinel-v36';
 
                 try {
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -71,13 +71,13 @@
 </head>
 <body>
 
-    <!-- 顶部状态栏 -->
+    <!-- 顶部状态栏 (优化手机端布局) -->
     <div id="topHeader" class="sticky top-0 z-50 bg-[#0b0e11]/95 backdrop-blur-md border-b border-[#2b3139] px-4 py-3 flex justify-between items-center text-white">
-        <div class="flex-shrink min-w-0 pr-2">
-            <h1 class="text-lg sm:text-xl font-black text-[#f0b90b] italic tracking-tighter uppercase truncate">Sentinel Pro</h1>
+        <div class="flex-shrink min-w-0 pr-2 text-left">
+            <h1 class="text-lg font-black text-[#f0b90b] italic tracking-tighter uppercase truncate">Sentinel Pro</h1>
             <div class="flex items-center gap-1">
                 <span id="apiStatusDot" class="w-1.5 h-1.5 rounded-full bg-slate-600"></span>
-                <p id="globalStatus" class="text-[7px] font-bold text-slate-500 uppercase tracking-widest truncate">Live Diagnostic Ready</p>
+                <p id="globalStatus" class="text-[7px] font-bold text-slate-500 uppercase tracking-widest truncate">Precision & Notional Fixed</p>
             </div>
         </div>
         <div class="flex gap-2 flex-shrink-0">
@@ -106,26 +106,26 @@
         <section id="tab-market" class="tab-content space-y-4">
             <div class="app-card p-6">
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-black text-[#f0b90b] italic uppercase text-sm">24H 实时涨跌榜</h3>
+                    <h3 class="text-lg font-black text-[#f0b90b] italic uppercase text-sm">24H 实时行情</h3>
                     <div class="flex gap-2">
                         <button id="btn-spot" onclick="switchMarketType('spot')" class="sub-tab-btn active px-3 py-1.5 rounded-lg text-[10px] bg-slate-800 text-white font-black">现货</button>
                         <button id="btn-futures" onclick="switchMarketType('futures')" class="sub-tab-btn px-3 py-1.5 rounded-lg text-[10px] bg-slate-800 text-slate-500 font-black">合约</button>
                     </div>
                 </div>
                 <div class="relative mb-4">
-                    <input type="text" id="marketSearch" oninput="filterMarketList()" class="input-dark pl-10 text-xs py-3" placeholder="定位币种 (如: SOL, BNX)...">
+                    <input type="text" id="marketSearch" oninput="filterMarketList()" class="input-dark pl-10 text-xs py-3" placeholder="搜索币种 (如: SOL, BNX)...">
                     <svg class="w-4 h-4 text-slate-500 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
                 <div id="gainersList" class="divide-y divide-white/5 max-h-[55vh] overflow-y-auto pr-1 text-white"></div>
             </div>
         </section>
 
-        <!-- 执行流水 (关键：错误诊断在这里显示) -->
+        <!-- 日志 -->
         <section id="tab-alerts" class="tab-content">
-            <div class="app-card p-6">
+            <div class="app-card p-6 text-left">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-black text-[#f0b90b] italic uppercase text-sm text-left">实盘诊断流水</h3>
-                    <button onclick="clearAlertHistory()" class="text-[9px] text-slate-500 uppercase underline">清空</button>
+                    <h3 class="text-lg font-black text-[#f0b90b] italic uppercase text-sm">系统执行流水</h3>
+                    <button onclick="clearAlertHistory()" class="text-[9px] text-slate-500 underline uppercase">清空</button>
                 </div>
                 <div id="alertLogList" class="space-y-3 max-h-[60vh] overflow-y-auto pr-2"></div>
             </div>
@@ -151,12 +151,12 @@
             <span class="text-[9px] font-black uppercase text-center">终端</span>
         </button>
         <button onclick="showTab('market')" id="nav-market" class="nav-item flex flex-col items-center gap-1 flex-1 text-slate-500">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             <span class="text-[9px] font-black uppercase text-center">行情</span>
         </button>
         <button onclick="showTab('alerts')" id="nav-alerts" class="nav-item flex flex-col items-center gap-1 flex-1 text-slate-500">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-            <span class="text-[9px] font-black uppercase text-center">流水</span>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <span class="text-[9px] font-black uppercase text-center">日志</span>
         </button>
         <button onclick="showTab('account')" id="nav-account" class="nav-item flex flex-col items-center gap-1 flex-1 text-slate-500">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -168,7 +168,7 @@
     <div id="modal" class="fixed inset-0 bg-black/95 backdrop-blur-2xl hidden flex items-center justify-center z-[100] p-6 overflow-y-auto text-white text-left">
         <div class="bg-[#1e2329] w-full max-w-lg p-8 my-10 rounded-[2.5rem] border border-[#2b3139] shadow-2xl">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-black text-[#f0b90b] italic uppercase">抓针方案部署</h2>
+                <h2 class="text-xl font-black text-[#f0b90b] italic uppercase">策略部署</h2>
                 <button onclick="closeModal()" class="text-slate-500 text-3xl">&times;</button>
             </div>
             <div class="space-y-5">
@@ -227,7 +227,7 @@
             <p id="cmText" class="text-xs text-slate-400 mb-8 px-4 text-center">是否执行此项强制指令？</p>
             <div class="flex gap-4">
                 <button onclick="closeCM()" class="flex-1 py-3 text-slate-500 font-black text-[10px] uppercase">取消</button>
-                <button id="cmConfirmBtn" class="flex-1 py-3 bg-[#f6465d] text-white rounded-xl font-black text-[10px] uppercase">执行指令</button>
+                <button id="cmConfirmBtn" class="flex-1 py-3 bg-[#f6465d] text-white rounded-xl font-black text-[10px] uppercase">确认执行</button>
             </div>
         </div>
     </div>
@@ -276,12 +276,23 @@
             } catch (e) {}
         }
 
-        function formatQuantity(symbol, qty) {
+        /**
+         * 改进版精度格式化：支持向上/向下取整
+         * isOpening: 是否为开仓（开仓向上取整确保名义价值满足门槛；平仓向下取整确保不超卖）
+         */
+        function formatQuantity(symbol, qty, isOpening = false) {
             const info = exchangeInfoMap[symbol];
             if (!info) return qty.toFixed(3);
             const p = info.quantityPrecision;
             const factor = Math.pow(10, p);
-            return (Math.floor(qty * factor) / factor).toFixed(p);
+            
+            if (isOpening) {
+                // 开仓向上取整，并增加极小偏移，确保 Notional >= 5.0U
+                return (Math.ceil(qty * factor) / factor).toFixed(p);
+            } else {
+                // 平仓向下取整，确保不会因为进位导致平仓量大于持仓量
+                return (Math.floor(qty * factor) / factor).toFixed(p);
+            }
         }
 
         async function signedRequest(method, endpoint, params = {}) {
@@ -308,19 +319,25 @@
 
         async function executeLiveTrade(bot, side, qty, reason) {
             if (!bot.isLive) return;
-            const formattedQty = formatQuantity(bot.symbol, qty);
+            
+            // 策略逻辑：如果是开仓或补仓(SELL)，使用 ceil 取整确保名义价值足够。如果是止盈平仓(BUY)，使用 floor。
+            const isOpening = (side === 'SELL');
+            
+            // 重要：针对 5U 下单，给下单量增加 1.5% 的安全冗余，确保截断后名义价值仍 > 5.0
+            const safeQty = isOpening ? (qty * 1.015) : qty;
+            const formattedQty = formatQuantity(bot.symbol, safeQty, isOpening);
+            
             const params = {
                 symbol: bot.symbol,
-                side: side, // BUY or SELL
+                side: side,
                 type: 'MARKET',
                 quantity: formattedQty
             };
             
             const result = await signedRequest('POST', '/fapi/v1/order', params);
             if (result.orderId) {
-                triggerReminder(`[实盘成功] ${bot.symbol} ${reason}成交, 数量:${formattedQty}`, 'system');
+                triggerReminder(`[实盘成功] ${bot.symbol} ${reason}, 数量:${formattedQty}`, 'system');
             } else {
-                // 核心：更详细的错误诊断显示
                 const errMsg = result.msg || result.error || "未知错误";
                 triggerReminder(`[实盘失败] ${bot.symbol} ${errMsg}`, 'loss');
                 console.error("Live Order Error:", result);
@@ -380,8 +397,8 @@
                         bot.currentAmtU = bot.addVal; bot.entryTime = now; bot.maxPnlEver = 0;
                         bot.halfExited = false; bot.entryCount = 1; bot.shieldActive = false; bot.pnl = 0;
                         
-                        triggerReminder(`[信号] ${bot.symbol} 满足抓针条件，入场位:${bot.entryPrice.toFixed(4)}`, 'entry');
-                        // 实盘开仓 (SELL)
+                        triggerReminder(`[信号] ${bot.symbol} 触发布防, 价格:${bot.entryPrice.toFixed(4)}`, 'entry');
+                        // 实盘 SELL (开空)
                         executeLiveTrade(bot, 'SELL', bot.addVal / feed.price, '开空入场');
                     } else { bot.isRsiReady = rsiOk; }
                 } else if(bot.state === 'HOLDING') {
@@ -397,26 +414,28 @@
                     if(bot.shieldActive && feed.price > bot.entryPrice) {
                         closePosition(bot, `保本止损`, 'loss'); return;
                     }
+
                     if(bot.pnl <= -50) {
                         if (bot.entryCount <= 3) {
                             const oldVal = bot.currentAmtU; const newVal = bot.addVal;
                             bot.entryPrice = ((bot.entryPrice * oldVal) + (feed.price * newVal)) / (oldVal + newVal);
                             bot.currentAmtU += newVal; bot.lastEntryPrice = feed.price; bot.entryCount += 1;
                             bot.shieldActive = false;
-                            triggerReminder(`[加仓] ${bot.symbol} 第${bot.entryCount}层`, 'add');
+                            triggerReminder(`[补仓] ${bot.symbol} 加仓第${bot.entryCount}层`, 'add');
                             executeLiveTrade(bot, 'SELL', bot.addVal / feed.price, '补仓');
                         } else {
                             closePosition(bot, `3补后亏50%强平`, 'loss'); return;
                         }
                     }
+
                     if(bot.pnl >= 50 && !bot.halfExited) {
-                        bot.totalProfit += (bot.currentAmtU / 2) * (bot.pnl / 100);
                         const exitQty = (bot.currentAmtU / 2) / feed.price;
+                        bot.totalProfit += (bot.currentAmtU / 2) * (bot.pnl / 100);
                         bot.currentAmtU /= 2; bot.halfExited = true;
-                        triggerReminder(`[半平] ${bot.symbol} 50%锁利`, 'profit');
-                        executeLiveTrade(bot, 'BUY', exitQty, '减仓锁利');
+                        triggerReminder(`[半平] ${bot.symbol} 已锁50%利润`, 'profit');
+                        executeLiveTrade(bot, 'BUY', exitQty, '减仓');
                     }
-                    if(hoursElapsed >= 1 && bot.maxPnlEver < 50) { closePosition(bot, "1h未达标离场", 'profit'); return; }
+                    if(hoursElapsed >= 1 && bot.maxPnlEver < 50) { closePosition(bot, "1h未达标", 'profit'); return; }
                     if(hoursElapsed >= 6) { closePosition(bot, "6h强制结清", 'profit'); return; }
                 }
             });
@@ -435,7 +454,7 @@
         function renderStrategies() {
             const grid = document.getElementById('strategyGrid');
             if(!grid) return;
-            if(strategies.length === 0) { grid.innerHTML = '<p class="col-span-full py-20 text-center opacity-30 text-[10px] font-black uppercase tracking-widest text-white">等待部署...</p>'; return; }
+            if(strategies.length === 0) { grid.innerHTML = '<p class="col-span-full py-20 text-center opacity-30 text-[10px] font-black uppercase text-white">等待部署...</p>'; return; }
             grid.innerHTML = strategies.map(bot => {
                 const feed = marketFeed[bot.symbol] || { price: 0, rsi15: 0 };
                 const isReady = bot.state === 'IDLE' && bot.isRsiReady;
